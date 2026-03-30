@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\KpiTemplateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\KpiPeriodController;
+use App\Http\Controllers\Api\LaporanHarianController;
+use App\Http\Controllers\Api\LaporanSopController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -39,6 +41,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/transaksi/{id}', [TransaksiController::class, 'show']);
     Route::get('/transaksi/unit-bisnis/{unitBisnisId}', [TransaksiController::class, 'byPeriode']);
     Route::post('/transaksi', [TransaksiController::class, 'store']);
+
+    // Laporan Harian
+    Route::get('/laporan-harian', [LaporanHarianController::class, 'index']);
+    Route::get('/laporan-harian/{id}', [LaporanHarianController::class, 'show']);
+    Route::get('/laporan-harian/unit-bisnis/{unitBisnisId}', [LaporanHarianController::class, 'byPeriode']);
+    Route::post('/laporan-harian', [LaporanHarianController::class, 'store']);
+    Route::put('/laporan-harian/{id}', [LaporanHarianController::class, 'update']);
+
+    // Laporan SOP
+    Route::get('/laporan-sop', [LaporanSopController::class, 'index']);
+    Route::get('/laporan-sop/{id}', [LaporanSopController::class, 'show']);
+    Route::post('/laporan-sop', [LaporanSopController::class, 'store']);
+
 });
 
 // Protected routes  owner only
@@ -69,4 +84,11 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     // Transaksi - owner only bisa edit & hapus
     Route::put('/transaksi/{id}', [TransaksiController::class, 'update']);
     Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy']);
+
+    // Laporan Harian - owner only bisa hapus
+    Route::delete('/laporan-harian/{id}', [LaporanHarianController::class, 'destroy']);
+
+    // Laporan SOP - owner only bisa review & hapus
+    Route::patch('/laporan-sop/{id}/review', [LaporanSopController::class, 'review']);
+    Route::delete('/laporan-sop/{id}', [LaporanSopController::class, 'destroy']);
 });
