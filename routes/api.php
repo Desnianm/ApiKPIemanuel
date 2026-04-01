@@ -9,6 +9,9 @@ use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\KpiPeriodController;
 use App\Http\Controllers\Api\LaporanHarianController;
 use App\Http\Controllers\Api\LaporanSopController;
+use App\Http\Controllers\Api\PayrollReminderController;
+use App\Http\Controllers\Api\SopController;
+use App\Http\Controllers\Api\AuditLogController;    
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -54,6 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/laporan-sop/{id}', [LaporanSopController::class, 'show']);
     Route::post('/laporan-sop', [LaporanSopController::class, 'store']);
 
+    // SOP - semua role bisa lihat
+    Route::get('/sop', [SopController::class, 'index']);
+    Route::get('/sop/{id}', [SopController::class, 'show']);
+
 });
 
 // Protected routes  owner only
@@ -91,4 +98,21 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     // Laporan SOP - owner only bisa review & hapus
     Route::patch('/laporan-sop/{id}/review', [LaporanSopController::class, 'review']);
     Route::delete('/laporan-sop/{id}', [LaporanSopController::class, 'destroy']);
+
+    // Payroll Reminder
+    Route::get('/payroll-reminders', [PayrollReminderController::class, 'index']);
+    Route::get('/payroll-reminders/user/{userId}', [PayrollReminderController::class, 'byUser']);
+    Route::post('/payroll-reminders', [PayrollReminderController::class, 'store']);
+    Route::put('/payroll-reminders/{id}', [PayrollReminderController::class, 'update']);
+    Route::patch('/payroll-reminders/{id}/toggle', [PayrollReminderController::class, 'toggleReminder']);
+    Route::delete('/payroll-reminders/{id}', [PayrollReminderController::class, 'destroy']);
+
+    // SOP CRUD
+    Route::post('/sop', [SopController::class, 'store']);
+    Route::put('/sop/{id}', [SopController::class, 'update']);
+    Route::delete('/sop/{id}', [SopController::class, 'destroy']);
+
+    // Audit Log
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/audit-logs/user/{userId}', [AuditLogController::class, 'byUser']);
 });
