@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
+use App\Helpers\PeriodeHelper;
+use App\Helpers\AuditHelper;
 use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
@@ -53,21 +55,24 @@ class TransaksiController extends Controller
             'tahun' => 'required|integer|min:2000',
         ]);
 
+        // Pakai range periode tanggal 26 bulan lalu - 25 bulan ini
+        $range = PeriodeHelper::getRangePeriode($request->bulan, $request->tahun);
+
         $transaksi = Transaksi::with(['unitBisnis', 'user'])
             ->where('unit_bisnis_id', $unitBisnisId)
-            ->whereMonth('created_at', $request->bulan)
-            ->whereYear('created_at', $request->tahun)
-            ->orderBy('created_at', 'desc')
+            ->whereBetween('tanggal_checkin', [$range['start'], $range['end']])
+            ->orderBy('tanggal_checkin', 'desc')
             ->get();
 
         $totalNominal = $transaksi->sum('nominal');
         $totalOmset   = $transaksi->sum('omset');
 
         return response()->json([
-            'data'          => $transaksi,
-            'total_nominal' => $totalNominal,
-            'total_omset'   => $totalOmset,
+            'data'            => $transaksi,
+            'total_nominal'   => $totalNominal,
+            'total_omset'     => $totalOmset,
             'total_transaksi' => $transaksi->count(),
+            'periode'         => $range,
         ], 200);
     }
 
@@ -98,10 +103,13 @@ class TransaksiController extends Controller
             $tanggal
         );
 
+        // Hitung periode otomatis berdasarkan tanggal
+        $periode = PeriodeHelper::hitungPeriode($tanggal);
+
         // Cek duplikat
         if (Transaksi::isDuplikat($bookingKey)) {
             return response()->json([
-                'message' => 'Transaksi ini sudah pernah diinput sebelumnya (duplikat).',
+                'message'     => 'Transaksi ini sudah pernah diinput sebelumnya (duplikat).',
                 'booking_key' => $bookingKey,
             ], 422);
         }
@@ -124,10 +132,20 @@ class TransaksiController extends Controller
             'status_transaksi' => $request->status_transaksi,
         ]);
 
+        // Catat audit log
+        AuditHelper::log(
+            userId: auth()->id(),
+            aksi: 'create',
+            tabelTarget: 'transaksi',
+            recordId: $transaksi->id,
+            dataBaru: $transaksi->toArray(),
+        );
+
         return response()->json([
             'message'     => 'Transaksi berhasil diinput.',
             'data'        => $transaksi,
             'booking_key' => $bookingKey,
+            'periode'     => $periode,
         ], 201);
     }
 
@@ -151,10 +169,23 @@ class TransaksiController extends Controller
             'status_transaksi' => 'nullable|string|max:50',
         ]);
 
+        // Simpan data lama untuk audit log
+        $dataLama = $transaksi->toArray();
+
         $transaksi->update($request->only([
             'nominal', 'omset', 'keterangan',
             'data_tambahan', 'bukti_bayar', 'status_transaksi'
         ]));
+
+        // Catat audit log
+        AuditHelper::log(
+            userId: auth()->id(),
+            aksi: 'update',
+            tabelTarget: 'transaksi',
+            recordId: $transaksi->id,
+            dataLama: $dataLama,
+            dataBaru: $transaksi->toArray(),
+        );
 
         return response()->json([
             'message' => 'Transaksi berhasil diupdate.',
@@ -172,6 +203,15 @@ class TransaksiController extends Controller
                 'message' => 'Transaksi tidak ditemukan.'
             ], 404);
         }
+
+        // Catat audit log sebelum hapus
+        AuditHelper::log(
+            userId: auth()->id(),
+            aksi: 'delete',
+            tabelTarget: 'transaksi',
+            recordId: $transaksi->id,
+            dataLama: $transaksi->toArray(),
+        );
 
         $transaksi->delete();
 
