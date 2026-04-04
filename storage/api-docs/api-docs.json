@@ -1,0 +1,1878 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "KPI Emanuel Corp API",
+        "description": "API Documentation untuk Aplikasi KPI Emanuel Corp",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Server"
+        },
+        {
+            "url": "/api"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login user",
+                "operationId": "9f1cc3f45c0fbfb67dd538fca102ef26",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "agung@emanuelcorp.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "AgungCorp2024!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "403": {
+                        "description": "Akun tidak aktif"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout user",
+                "operationId": "e23fda18faf52d08774446a52662cdaf",
+                "responses": {
+                    "200": {
+                        "description": "Logout berhasil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get profile user yang sedang login",
+                "operationId": "02ffc6e127bad815985f31b6637d4174",
+                "responses": {
+                    "200": {
+                        "description": "Data user"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-periods": {
+            "get": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Get semua KPI period",
+                "operationId": "0f9ea6771f5b1dbda209b583d1e8366e",
+                "responses": {
+                    "200": {
+                        "description": "List KPI period"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Buat KPI period baru (owner only)",
+                "operationId": "ba5bdf5f85608055be80fa2ee680ad84",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unit_bisnis_id",
+                                    "kpi_template_id",
+                                    "periode_bulan",
+                                    "periode_tahun",
+                                    "target",
+                                    "threshold_hijau",
+                                    "threshold_kuning"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kpi_template_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "periode_bulan": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "periode_tahun": {
+                                        "type": "integer",
+                                        "example": 2026
+                                    },
+                                    "target": {
+                                        "type": "number",
+                                        "example": 70000000
+                                    },
+                                    "threshold_hijau": {
+                                        "type": "number",
+                                        "example": 65
+                                    },
+                                    "threshold_kuning": {
+                                        "type": "number",
+                                        "example": 56
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "KPI period berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-periods/summary": {
+            "get": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Get summary & ranking KPI semua unit bisnis",
+                "operationId": "16b24217b41034ea7894bac48ef0d681",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Summary KPI"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-periods/unit-bisnis/{unitBisnisId}": {
+            "get": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Get KPI period by unit bisnis & periode",
+                "operationId": "d3ac1c1ab7c6ab62b1909ad346962be3",
+                "parameters": [
+                    {
+                        "name": "unitBisnisId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List KPI period by unit bisnis"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-periods/{id}/realisasi": {
+            "put": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Update realisasi KPI",
+                "operationId": "d71576c2ab1382a2544e169bde22575a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "realisasi"
+                                ],
+                                "properties": {
+                                    "realisasi": {
+                                        "type": "number",
+                                        "example": 35000000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Realisasi KPI berhasil diupdate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-periods/{id}": {
+            "put": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Update target & threshold KPI (owner only)",
+                "operationId": "289bf2f4087a7f2761da9c6127ee0bce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI period berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "KPI Period"
+                ],
+                "summary": "Hapus KPI period (owner only)",
+                "operationId": "b6746319ca2af1cbb78002871eaab9bf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI period berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-templates": {
+            "get": {
+                "tags": [
+                    "KPI Template"
+                ],
+                "summary": "Get semua KPI template",
+                "operationId": "c2765a11315fbd565b1e870a56fee328",
+                "responses": {
+                    "200": {
+                        "description": "List KPI template"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI Template"
+                ],
+                "summary": "Buat KPI template baru (owner only)",
+                "operationId": "354463128866e85472b1745b8912dd5a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unit_bisnis_id",
+                                    "nama",
+                                    "kategori",
+                                    "satuan"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Revenue Bulanan"
+                                    },
+                                    "kategori": {
+                                        "type": "string",
+                                        "enum": [
+                                            "sales",
+                                            "marketing",
+                                            "operasional"
+                                        ]
+                                    },
+                                    "satuan": {
+                                        "type": "string",
+                                        "example": "rupiah"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Total cash in per bulan"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "KPI template berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-templates/{id}": {
+            "get": {
+                "tags": [
+                    "KPI Template"
+                ],
+                "summary": "Get detail KPI template",
+                "operationId": "04404600139658defc4fdd9dc00e5946",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail KPI template"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "KPI Template"
+                ],
+                "summary": "Update KPI template (owner only)",
+                "operationId": "234232a3add7c0df906eb54419c095e7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI template berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "KPI Template"
+                ],
+                "summary": "Hapus KPI template (owner only)",
+                "operationId": "b14d3d4d1e4d1d6db0464ae66b99636d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI template berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-templates/unit-bisnis/{unitBisnisId}": {
+            "get": {
+                "tags": [
+                    "KPI Template"
+                ],
+                "summary": "Get KPI template by unit bisnis",
+                "operationId": "06817ad148cfd0368ae1c26940206c33",
+                "parameters": [
+                    {
+                        "name": "unitBisnisId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List KPI template by unit bisnis"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-harian": {
+            "get": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Get semua laporan harian",
+                "operationId": "8f926d61d98d6ce70de31d59e9a97a2b",
+                "responses": {
+                    "200": {
+                        "description": "List laporan harian"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Input laporan harian",
+                "operationId": "064357c914dc303665fdfb506fe37f07",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unit_bisnis_id",
+                                    "tanggal",
+                                    "aktivitas"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tanggal": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-29"
+                                    },
+                                    "aktivitas": {
+                                        "type": "string",
+                                        "example": "Meeting dengan calon buyer"
+                                    },
+                                    "leads_masuk": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "closing_deal": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Catatan tambahan"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Laporan harian berhasil diinput"
+                    },
+                    "422": {
+                        "description": "Laporan sudah ada untuk tanggal ini"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-harian/{id}": {
+            "put": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Update laporan harian",
+                "operationId": "e5e76bb8d899bc0f6d39facd3c721175",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan harian berhasil diupdate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Hapus laporan harian (owner only)",
+                "operationId": "c253d1db29eab7b5d67ba2c4006c340f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan harian berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-sop": {
+            "get": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Get semua laporan SOP",
+                "operationId": "2213dbc163ac78de695b1bc88cd9ab95",
+                "responses": {
+                    "200": {
+                        "description": "List laporan SOP"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Input laporan SOP",
+                "operationId": "ffe7144c7e65ca355e93032387cffda1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unit_bisnis_id",
+                                    "tanggal",
+                                    "deskripsi"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tanggal": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-29"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Pengecekan kebersihan"
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "example": "foto.jpg"
+                                    },
+                                    "lokasi": {
+                                        "type": "string",
+                                        "example": "Cluster de Matraman"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": -6.2088
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 106.8456
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Laporan SOP berhasil diinput"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-sop/{id}/review": {
+            "patch": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Review laporan SOP (owner only)",
+                "operationId": "8304c9c065751f9cc7d8e18dbb95faf3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "approved",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "catatan_owner": {
+                                        "type": "string",
+                                        "example": "SOP sudah dijalankan dengan baik"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Laporan SOP berhasil direview"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-sop/{id}": {
+            "delete": {
+                "tags": [
+                    "Laporan"
+                ],
+                "summary": "Hapus laporan SOP (owner only)",
+                "operationId": "e895f232a8cdfb5c00aef503f744506a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan SOP berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/payroll-reminders": {
+            "get": {
+                "tags": [
+                    "Payroll & SOP"
+                ],
+                "summary": "Get semua payroll reminder (owner only)",
+                "operationId": "caeb3497466a0efad96166936a1a4e3c",
+                "responses": {
+                    "200": {
+                        "description": "List payroll reminder"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Payroll & SOP"
+                ],
+                "summary": "Buat payroll reminder (owner only)",
+                "operationId": "c11a4601cb59c40e9c337c9fbb85af28",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "periode_bulan",
+                                    "periode_tahun",
+                                    "gaji_pokok"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "periode_bulan": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "periode_tahun": {
+                                        "type": "integer",
+                                        "example": 2026
+                                    },
+                                    "gaji_pokok": {
+                                        "type": "number",
+                                        "example": 3000000
+                                    },
+                                    "tunjangan": {
+                                        "type": "number",
+                                        "example": 500000
+                                    },
+                                    "potongan": {
+                                        "type": "number",
+                                        "example": 100000
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Gaji bulan Maret"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payroll reminder berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/payroll-reminders/{id}/toggle": {
+            "patch": {
+                "tags": [
+                    "Payroll & SOP"
+                ],
+                "summary": "Toggle sudah diingatkan (owner only)",
+                "operationId": "0db857ba4da3f5b190e2af3bbfc20686",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status reminder berhasil diubah"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sop": {
+            "get": {
+                "tags": [
+                    "Payroll & SOP"
+                ],
+                "summary": "Get semua SOP",
+                "operationId": "c183e6a435361a814d84a643d1cd6d2d",
+                "responses": {
+                    "200": {
+                        "description": "List SOP"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Payroll & SOP"
+                ],
+                "summary": "Buat SOP baru (owner only)",
+                "operationId": "f7610bdbd92460594151863c7ad62f52",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "judul",
+                                    "konten"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "judul": {
+                                        "type": "string",
+                                        "example": "Aturan Input Transaksi"
+                                    },
+                                    "konten": {
+                                        "type": "string",
+                                        "example": "Setiap transaksi wajib disertai bukti bayar"
+                                    },
+                                    "urutan": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "SOP berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/audit-logs": {
+            "get": {
+                "tags": [
+                    "Audit Log"
+                ],
+                "summary": "Get semua audit log (owner only)",
+                "operationId": "41c7c156f0dca193cc9e22355cce7941",
+                "responses": {
+                    "200": {
+                        "description": "List audit log"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/audit-logs/user/{userId}": {
+            "get": {
+                "tags": [
+                    "Audit Log"
+                ],
+                "summary": "Get audit log by user (owner only)",
+                "operationId": "b03079b25eadd68bc7d650e92154498e",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List audit log by user"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transaksi": {
+            "get": {
+                "tags": [
+                    "Transaksi"
+                ],
+                "summary": "Get semua transaksi",
+                "operationId": "d427bb9b79173e69553717d5123308cc",
+                "responses": {
+                    "200": {
+                        "description": "List transaksi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Transaksi"
+                ],
+                "summary": "Input transaksi baru",
+                "operationId": "63863369b0b3473922dab3d7d39ba909",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unit_bisnis_id",
+                                    "nama_customer",
+                                    "no_hp",
+                                    "tipe_transaksi",
+                                    "nominal"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "nama_customer": {
+                                        "type": "string",
+                                        "example": "Michael"
+                                    },
+                                    "no_hp": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "tipe_transaksi": {
+                                        "type": "string",
+                                        "enum": [
+                                            "booking_fee",
+                                            "dp",
+                                            "pelunasan",
+                                            "sewa_harian",
+                                            "penjualan",
+                                            "lainnya"
+                                        ]
+                                    },
+                                    "nominal": {
+                                        "type": "number",
+                                        "example": 5000000
+                                    },
+                                    "omset": {
+                                        "type": "number",
+                                        "example": 35000000
+                                    },
+                                    "tanggal_checkin": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-28"
+                                    },
+                                    "tanggal_checkout": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-03-30"
+                                    },
+                                    "keterangan": {
+                                        "type": "string",
+                                        "example": "DP villa 2 malam"
+                                    },
+                                    "data_tambahan": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Transaksi berhasil diinput"
+                    },
+                    "422": {
+                        "description": "Duplikat transaksi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transaksi/{id}": {
+            "get": {
+                "tags": [
+                    "Transaksi"
+                ],
+                "summary": "Get detail transaksi",
+                "operationId": "c926374a5ad1bab36e7e4899a8a502f3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail transaksi"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Transaksi"
+                ],
+                "summary": "Update transaksi (owner only)",
+                "operationId": "a4fa8a54fcc086ec3cf88591012520d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaksi berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Transaksi"
+                ],
+                "summary": "Hapus transaksi (owner only)",
+                "operationId": "51a27e007a55767925cf71264f1ece02",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaksi berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transaksi/unit-bisnis/{unitBisnisId}": {
+            "get": {
+                "tags": [
+                    "Transaksi"
+                ],
+                "summary": "Get transaksi by unit bisnis & periode",
+                "operationId": "30f7402c3653e8e3a78ccbbab539f93b",
+                "parameters": [
+                    {
+                        "name": "unitBisnisId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List transaksi by periode"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/unit-bisnis": {
+            "get": {
+                "tags": [
+                    "Unit Bisnis"
+                ],
+                "summary": "Get semua unit bisnis",
+                "operationId": "dfc6680af9d3b742cc7c04d694a86836",
+                "responses": {
+                    "200": {
+                        "description": "List unit bisnis"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Unit Bisnis"
+                ],
+                "summary": "Buat unit bisnis baru (owner only)",
+                "operationId": "94cac6dbef0ec8c20ed68d4026474494",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kategori_id",
+                                    "nama"
+                                ],
+                                "properties": {
+                                    "kategori_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Unit Bisnis Baru"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Deskripsi unit bisnis"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "example": "logo.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Unit bisnis berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/unit-bisnis/{id}": {
+            "get": {
+                "tags": [
+                    "Unit Bisnis"
+                ],
+                "summary": "Get detail unit bisnis",
+                "operationId": "d2900003217972da8b74497bafad782a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail unit bisnis"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Unit Bisnis"
+                ],
+                "summary": "Update unit bisnis (owner only)",
+                "operationId": "57da7799c37f70ff983364e42acf0a4e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Nama Baru"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Unit bisnis berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Unit Bisnis"
+                ],
+                "summary": "Hapus unit bisnis (owner only)",
+                "operationId": "e72b38da1086d768e31a449568fb20b6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit bisnis berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kategori-unit-bisnis": {
+            "get": {
+                "tags": [
+                    "Unit Bisnis"
+                ],
+                "summary": "Get semua kategori unit bisnis",
+                "operationId": "8cbbe2c32fadd10c377cba3c356b938a",
+                "responses": {
+                    "200": {
+                        "description": "List kategori unit bisnis"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Get semua user (owner only)",
+                "operationId": "a078c71eacbebf85ff69318a968c4495",
+                "responses": {
+                    "200": {
+                        "description": "List user"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Buat user baru (owner only)",
+                "operationId": "0162c058e852a7b911f8ac2d5c1b9a5d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Karyawan Baru"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "karyawan@emanuelcorp.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "Password123!"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "owner",
+                                            "manajer",
+                                            "karyawan"
+                                        ]
+                                    },
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Get detail user (owner only)",
+                "operationId": "251a75dba278b1435eac4117246881c8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail user"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Update user (owner only)",
+                "operationId": "8f78e6fd9b84915645cb7ebbc5020420",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nama Baru"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "email@emanuelcorp.id"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "owner",
+                                            "manajer",
+                                            "karyawan"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Hapus user (owner only)",
+                "operationId": "f5f92a56ad4be80fd54ad004efd7e6ea",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{id}/toggle": {
+            "patch": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Toggle aktif/nonaktif user (owner only)",
+                "operationId": "c2501ebeaa7625514b5ed8b30cfb1b4d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status user berhasil diubah"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "KPI Period",
+            "description": "KPI Period"
+        },
+        {
+            "name": "KPI Template",
+            "description": "KPI Template"
+        },
+        {
+            "name": "Laporan",
+            "description": "Laporan"
+        },
+        {
+            "name": "Payroll & SOP",
+            "description": "Payroll & SOP"
+        },
+        {
+            "name": "Audit Log",
+            "description": "Audit Log"
+        },
+        {
+            "name": "Transaksi",
+            "description": "Transaksi"
+        },
+        {
+            "name": "Unit Bisnis",
+            "description": "Unit Bisnis"
+        },
+        {
+            "name": "User Management",
+            "description": "User Management"
+        }
+    ]
+}
