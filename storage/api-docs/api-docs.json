@@ -103,6 +103,511 @@
                 ]
             }
         },
+        "/api/form-templates": {
+            "get": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Get semua form template",
+                "operationId": "f96f8e977ac80a8abb2a1737a510d6da",
+                "responses": {
+                    "200": {
+                        "description": "List form template"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Buat form template baru (owner only)",
+                "operationId": "bff73f5fceccbbf4a2e4eeb9041c4df6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unit_bisnis_id",
+                                    "nama",
+                                    "fields"
+                                ],
+                                "properties": {
+                                    "unit_bisnis_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Form Pendapatan Harian"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Form input pendapatan harian"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "fields": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "label": {
+                                                    "type": "string",
+                                                    "example": "Total Pendapatan"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "text",
+                                                        "number",
+                                                        "date",
+                                                        "select",
+                                                        "textarea"
+                                                    ],
+                                                    "example": "number"
+                                                },
+                                                "wajib": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "urutan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kpi_template_id": {
+                                                    "type": "integer",
+                                                    "example": 2,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Form template berhasil dibuat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/form-templates/{id}": {
+            "get": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Get detail form template",
+                "operationId": "27aadf85c360737fcd13c5b12bf0e0b2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail form template"
+                    },
+                    "404": {
+                        "description": "Form template tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Update form template (owner only)",
+                "operationId": "c08942b988d00859415d5d097197b31c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Form Pendapatan Harian Update"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Deskripsi baru"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "fields": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "label": {
+                                                    "type": "string",
+                                                    "example": "Total Pendapatan"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "text",
+                                                        "number",
+                                                        "date",
+                                                        "select",
+                                                        "textarea"
+                                                    ],
+                                                    "example": "number"
+                                                },
+                                                "wajib": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "urutan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kpi_template_id": {
+                                                    "type": "integer",
+                                                    "example": 2,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Form template berhasil diupdate"
+                    },
+                    "404": {
+                        "description": "Form template tidak ditemukan"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Hapus form template (owner only)",
+                "operationId": "b571665b5db3cfb2e2560e02c624e9fc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Form template berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Form template tidak ditemukan"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/form-templates/unit-bisnis/{unitBisnisId}": {
+            "get": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Get form template berdasarkan unit bisnis",
+                "operationId": "bec65e9fb76bba4e36e8593b28355b51",
+                "parameters": [
+                    {
+                        "name": "unitBisnisId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List form template by unit bisnis"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/form-templates/{id}/toggle": {
+            "patch": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Aktifkan/nonaktifkan form template (owner only)",
+                "operationId": "bca2ea8fec754719e1f38304351ca4dc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status form template berhasil diubah"
+                    },
+                    "404": {
+                        "description": "Form template tidak ditemukan"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/form-submissions": {
+            "get": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Get semua submission form",
+                "operationId": "2bc70a01f923c963f5e21da0b9c72526",
+                "responses": {
+                    "200": {
+                        "description": "List submission form"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Submit form (karyawan)",
+                "operationId": "343375043f09775550437b4128a8d46c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "form_template_id",
+                                    "answers"
+                                ],
+                                "properties": {
+                                    "form_template_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "form_field_id": {
+                                                    "type": "integer",
+                                                    "example": 4
+                                                },
+                                                "nilai": {
+                                                    "type": "string",
+                                                    "example": "5"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Form berhasil disubmit"
+                    },
+                    "422": {
+                        "description": "Field wajib belum diisi"
+                    },
+                    "403": {
+                        "description": "Tidak bisa submit form unit bisnis lain"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/form-submissions/{id}": {
+            "get": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Get detail submission form",
+                "operationId": "7edc2d9bb32e503828fceffd9643a3d1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail submission form"
+                    },
+                    "404": {
+                        "description": "Submission tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Hapus submission (owner only)",
+                "operationId": "b6a6f67962ccdbe120a87badc3884c44",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Submission tidak ditemukan"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/form-submissions/form/{formTemplateId}": {
+            "get": {
+                "tags": [
+                    "Form Builder"
+                ],
+                "summary": "Get submission berdasarkan form template",
+                "operationId": "71b8e05b41c5113d93e7e345b6613065",
+                "parameters": [
+                    {
+                        "name": "formTemplateId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List submission by form template"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/kpi-periods": {
             "get": {
                 "tags": [
@@ -1841,6 +2346,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Form Builder",
+            "description": "Form Builder"
         },
         {
             "name": "KPI Period",

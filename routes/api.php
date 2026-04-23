@@ -12,7 +12,8 @@ use App\Http\Controllers\Api\LaporanSopController;
 use App\Http\Controllers\Api\PayrollReminderController;
 use App\Http\Controllers\Api\SopController;
 use App\Http\Controllers\Api\AuditLogController;    
-
+use App\Http\Controllers\Api\FormTemplateController;
+use App\Http\Controllers\Api\FormSubmissionController;
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -60,6 +61,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // SOP - semua role bisa lihat
     Route::get('/sop', [SopController::class, 'index']);
     Route::get('/sop/{id}', [SopController::class, 'show']);
+
+    // Form Template - semua role bisa lihat
+    Route::get('/form-templates', [FormTemplateController::class, 'index']);
+    Route::get('/form-templates/{id}', [FormTemplateController::class, 'show']);
+    Route::get('/form-templates/unit-bisnis/{unitBisnisId}', [FormTemplateController::class, 'byUnitBisnis']);
+
+    // Form Submission - semua role bisa lihat & submit
+    Route::get('/form-submissions', [FormSubmissionController::class, 'index']);
+    Route::get('/form-submissions/{id}', [FormSubmissionController::class, 'show']);
+    Route::get('/form-submissions/form/{formTemplateId}', [FormSubmissionController::class, 'byForm']);
+    Route::post('/form-submissions', [FormSubmissionController::class, 'store']);
 
 });
 
@@ -115,4 +127,13 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     // Audit Log
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
     Route::get('/audit-logs/user/{userId}', [AuditLogController::class, 'byUser']);
+
+    // Form Template & Submission - owner only bisa CRUD
+    Route::post('/form-templates', [FormTemplateController::class, 'store']);
+    Route::put('/form-templates/{id}', [FormTemplateController::class, 'update']);
+    Route::delete('/form-templates/{id}', [FormTemplateController::class, 'destroy']);
+    Route::patch('/form-templates/{id}/toggle', [FormTemplateController::class, 'toggle']);
+
+    // Owner bisa hapus submission
+    Route::delete('/form-submissions/{id}', [FormSubmissionController::class, 'destroy']);
 });

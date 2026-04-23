@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class FormTemplate extends Model
+{
+    use HasFactory;
+
+    protected $table = 'form_templates';
+
+    protected $fillable = [
+        'unit_bisnis_id',
+        'nama',
+        'deskripsi',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function unitBisnis()
+    {
+        return $this->belongsTo(UnitBisnis::class, 'unit_bisnis_id');
+    }
+
+    public function formFields()
+    {
+        return $this->hasMany(FormField::class, 'form_template_id')->orderBy('urutan');
+    }
+
+    public function formSubmissions()
+    {
+        return $this->hasMany(FormSubmission::class, 'form_template_id');
+    }
+}
