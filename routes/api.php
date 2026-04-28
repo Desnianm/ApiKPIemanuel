@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\SopController;
 use App\Http\Controllers\Api\AuditLogController;    
 use App\Http\Controllers\Api\FormTemplateController;
 use App\Http\Controllers\Api\FormSubmissionController;
+use App\Http\Controllers\Api\LeaderboardController;
+
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -72,6 +74,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/form-submissions/{id}', [FormSubmissionController::class, 'show']);
     Route::get('/form-submissions/form/{formTemplateId}', [FormSubmissionController::class, 'byForm']);
     Route::post('/form-submissions', [FormSubmissionController::class, 'store']);
+
+    //leaderboard
+    Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 
 });
 

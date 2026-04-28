@@ -1406,6 +1406,149 @@
                 ]
             }
         },
+        "/api/leaderboard": {
+            "get": {
+                "tags": [
+                    "Leaderboard"
+                ],
+                "summary": "Get ranking/leaderboard semua unit bisnis berdasarkan KPI",
+                "operationId": "858793ccb87252682daa9b0eb933a74e",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan periode (1-12), default bulan ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 4
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun periode, default tahun ini",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ranking unit bisnis berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "periode": {
+                                            "properties": {
+                                                "bulan": {
+                                                    "type": "integer",
+                                                    "example": 4
+                                                },
+                                                "tahun": {
+                                                    "type": "integer",
+                                                    "example": 2026
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "ranking": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "unit_bisnis_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama": {
+                                                        "type": "string",
+                                                        "example": "Cluster de Matraman"
+                                                    },
+                                                    "kategori": {
+                                                        "type": "string",
+                                                        "example": "Properti"
+                                                    },
+                                                    "total_kpi": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "rata_rata_persen": {
+                                                        "type": "number",
+                                                        "example": 75.5
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "hijau",
+                                                            "kuning",
+                                                            "merah"
+                                                        ],
+                                                        "example": "kuning"
+                                                    },
+                                                    "detail_kpi": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "kpi_template_id": {
+                                                                    "type": "integer",
+                                                                    "example": 2
+                                                                },
+                                                                "nama_kpi": {
+                                                                    "type": "string",
+                                                                    "example": "Closing Deal"
+                                                                },
+                                                                "target": {
+                                                                    "type": "number",
+                                                                    "example": 10
+                                                                },
+                                                                "realisasi": {
+                                                                    "type": "number",
+                                                                    "example": 3
+                                                                },
+                                                                "persentase": {
+                                                                    "type": "number",
+                                                                    "example": 30
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "merah"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/payroll-reminders": {
             "get": {
                 "tags": [
@@ -2362,6 +2505,10 @@
         {
             "name": "Laporan",
             "description": "Laporan"
+        },
+        {
+            "name": "Leaderboard",
+            "description": "Leaderboard"
         },
         {
             "name": "Payroll & SOP",
