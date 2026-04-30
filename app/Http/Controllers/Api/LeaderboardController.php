@@ -41,6 +41,7 @@ class LeaderboardController extends Controller
                     'total_kpi'        => 0,
                     'rata_rata_persen' => 0,
                     'status'           => 'merah',
+                    'indikator'        => 'UNDERPERFORM',
                     'detail_kpi'       => [],
                 ];
                 continue;
@@ -84,6 +85,7 @@ class LeaderboardController extends Controller
                 'total_kpi'        => count($kpiPeriods),
                 'rata_rata_persen' => $rataRata,
                 'status'           => $statusKeseluruhan,
+                'indikator'        => $this->getIndikator($statusKeseluruhan),
                 'detail_kpi'       => $detailKpi,
             ];
         }
@@ -104,5 +106,18 @@ class LeaderboardController extends Controller
             ],
             'data'    => $leaderboard,
         ]);
+    }
+
+    /**
+     * Konversi status merah/kuning/hijau ke indikator
+     */
+    private function getIndikator(string $status): string
+    {
+        return match($status) {
+            'hijau'  => 'OVERPERFORM',
+            'kuning' => 'ON TRACK',
+            'merah'  => 'UNDERPERFORM',
+            default  => 'UNDERPERFORM',
+        };
     }
 }
