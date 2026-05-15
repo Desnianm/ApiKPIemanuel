@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class UnitBisnisController extends Controller
 {
-    // GET semua unit bisnis (owner lihat semua, karyawan lihat milik sendiri)
+    // GET semua unit bisnis
     public function index(Request $request)
     {
         $user = $request->user();
@@ -21,6 +21,14 @@ class UnitBisnisController extends Controller
                 ->where('id', $user->unit_bisnis_id)
                 ->get();
         }
+
+        // Tambahkan URL foto/logo secara dinamis
+        $unitBisnis->transform(function ($item) {
+            $item->logo_url = $item->logo 
+                ? asset('storage/' . $item->logo) 
+                : asset('storage/photos/default.jpeg');
+            return $item;
+        });
 
         return response()->json([
             'data' => $unitBisnis
@@ -38,12 +46,15 @@ class UnitBisnisController extends Controller
             ], 404);
         }
 
+        $unitBisnis->logo_url = $unitBisnis->logo 
+            ? asset('storage/' . $unitBisnis->logo) 
+            : asset('storage/photos/default.jpeg');
+
         return response()->json([
             'data' => $unitBisnis
         ], 200);
     }
 
-    // POST buat unit bisnis baru (owner only)
     public function store(Request $request)
     {
         $request->validate([
@@ -61,7 +72,6 @@ class UnitBisnisController extends Controller
         ], 201);
     }
 
-    // PUT update unit bisnis (owner only)
     public function update(Request $request, $id)
     {
         $unitBisnis = UnitBisnis::find($id);
@@ -88,7 +98,6 @@ class UnitBisnisController extends Controller
         ], 200);
     }
 
-    // DELETE unit bisnis (owner only)
     public function destroy($id)
     {
         $unitBisnis = UnitBisnis::find($id);
@@ -106,7 +115,6 @@ class UnitBisnisController extends Controller
         ], 200);
     }
 
-    // GET semua kategori unit bisnis
     public function kategori()
     {
         $kategori = KategoriUnitBisnis::with('unitBisnis')->get();

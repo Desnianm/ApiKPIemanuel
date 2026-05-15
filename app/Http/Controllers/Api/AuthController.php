@@ -44,6 +44,9 @@ class AuthController extends Controller
                 'role'           => $user->role,
                 'unit_bisnis_id' => $user->unit_bisnis_id,
                 'photo'          => $user->photo,
+                'photo_url'      => $user->photo 
+                                    ? asset('storage/' . $user->photo) 
+                                    : asset('storage/photos/default.jpeg'),
             ],
         ], 200);
     }
@@ -60,23 +63,26 @@ class AuthController extends Controller
 
     // Get profile user yang sedang login
     public function me(Request $request)
-{
-    $user = $request->user();
-    
-    return response()->json([
-        'user' => [
-            'id'             => $user->id,
-            'name'           => $user->name,
-            'email'          => $user->email,
-            'role'           => $user->role,
-            'unit_bisnis_id' => $user->unit_bisnis_id,
-            'unit_bisnis'    => $user->unit_bisnis_id ? [
-                'id'   => $user->unitBisnis->id,
-                'nama' => $user->unitBisnis->nama,
-            ] : null,
-            'photo'          => $user->photo,
-            'is_active'      => $user->is_active,
-        ]
-    ], 200);
-}
+    {
+        $user = $request->user();
+        
+        return response()->json([
+            'user' => [
+                'id'             => $user->id,
+                'name'           => $user->name,
+                'email'          => $user->email,
+                'role'           => $user->role,
+                'unit_bisnis_id' => $user->unit_bisnis_id,
+                'unit_bisnis'    => $user->unit_bisnis_id ? [
+                    'id'   => $user->unitBisnis->id,
+                    'nama' => $user->unitBisnis->nama,
+                ] : null,
+                'photo'          => $user->photo,
+                'photo_url'      => $user->photo 
+                                    ? asset('storage/' . $user->photo) 
+                                    : asset('storage/photos/default.jpeg'),
+                'is_active'      => $user->is_active,
+            ]
+        ], 200);
+    }
 }

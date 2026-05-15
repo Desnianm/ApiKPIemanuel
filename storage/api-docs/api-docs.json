@@ -9,9 +9,6 @@
         {
             "url": "http://127.0.0.1:8000",
             "description": "Local Server"
-        },
-        {
-            "url": "/api"
         }
     ],
     "paths": {
@@ -48,7 +45,57 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Login berhasil"
+                        "description": "Login berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login berhasil."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|token_string"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Little Bali Villa"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "lbv@emanuelcorp.id"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "karyawan"
+                                                },
+                                                "unit_bisnis_id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "photo": {
+                                                    "type": "string",
+                                                    "example": "photos/default.jpeg"
+                                                },
+                                                "photo_url": {
+                                                    "type": "string",
+                                                    "example": "http://103.253.213.207/storage/photos/default.jpeg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
                         "description": "Validasi gagal"
@@ -57,28 +104,6 @@
                         "description": "Akun tidak aktif"
                     }
                 }
-            }
-        },
-        "/api/logout": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Logout user",
-                "operationId": "e23fda18faf52d08774446a52662cdaf",
-                "responses": {
-                    "200": {
-                        "description": "Logout berhasil"
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/me": {
@@ -90,7 +115,33 @@
                 "operationId": "02ffc6e127bad815985f31b6637d4174",
                 "responses": {
                     "200": {
-                        "description": "Data user"
+                        "description": "Data user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Little Bali Villa"
+                                                },
+                                                "photo_url": {
+                                                    "type": "string",
+                                                    "example": "http://103.253.213.207/storage/photos/default.jpeg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -1421,7 +1472,7 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "example": 4
+                            "example": 5
                         }
                     },
                     {
@@ -1450,7 +1501,7 @@
                                             "properties": {
                                                 "bulan": {
                                                     "type": "integer",
-                                                    "example": 4
+                                                    "example": 5
                                                 },
                                                 "tahun": {
                                                     "type": "integer",
@@ -1475,17 +1526,21 @@
                                                         "type": "string",
                                                         "example": "Cluster de Matraman"
                                                     },
+                                                    "photo_url": {
+                                                        "type": "string",
+                                                        "example": "http://103.253.213.207/storage/photos/default.jpeg"
+                                                    },
                                                     "kategori": {
                                                         "type": "string",
                                                         "example": "Properti"
                                                     },
                                                     "total_kpi": {
                                                         "type": "integer",
-                                                        "example": 2
+                                                        "example": 0
                                                     },
                                                     "rata_rata_persen": {
                                                         "type": "number",
-                                                        "example": 75.5
+                                                        "example": 0
                                                     },
                                                     "status": {
                                                         "type": "string",
@@ -1494,39 +1549,15 @@
                                                             "kuning",
                                                             "merah"
                                                         ],
-                                                        "example": "kuning"
+                                                        "example": "merah"
+                                                    },
+                                                    "indikator": {
+                                                        "type": "string",
+                                                        "example": "UNDERPERFORM"
                                                     },
                                                     "detail_kpi": {
                                                         "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "kpi_template_id": {
-                                                                    "type": "integer",
-                                                                    "example": 2
-                                                                },
-                                                                "nama_kpi": {
-                                                                    "type": "string",
-                                                                    "example": "Closing Deal"
-                                                                },
-                                                                "target": {
-                                                                    "type": "number",
-                                                                    "example": 10
-                                                                },
-                                                                "realisasi": {
-                                                                    "type": "number",
-                                                                    "example": 3
-                                                                },
-                                                                "persentase": {
-                                                                    "type": "number",
-                                                                    "example": 30
-                                                                },
-                                                                "status": {
-                                                                    "type": "string",
-                                                                    "example": "merah"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
+                                                        "items": {}
                                                     }
                                                 },
                                                 "type": "object"
@@ -2045,7 +2076,65 @@
                 "operationId": "dfc6680af9d3b742cc7c04d694a86836",
                 "responses": {
                     "200": {
-                        "description": "List unit bisnis"
+                        "description": "List unit bisnis",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "kategori_id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "nama": {
+                                                        "type": "string",
+                                                        "example": "Little Bali Villa"
+                                                    },
+                                                    "deskripsi": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "logo": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "logo_url": {
+                                                        "type": "string",
+                                                        "example": "http://103.253.213.207/storage/photos/default.jpeg"
+                                                    },
+                                                    "kategori": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "nama": {
+                                                                "type": "string",
+                                                                "example": "Properti Management"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -2129,7 +2218,33 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Detail unit bisnis"
+                        "description": "Detail unit bisnis",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "nama": {
+                                                    "type": "string",
+                                                    "example": "Little Bali Villa"
+                                                },
+                                                "logo_url": {
+                                                    "type": "string",
+                                                    "example": "http://103.253.213.207/storage/photos/default.jpeg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Tidak ditemukan"
@@ -2179,9 +2294,6 @@
                 "responses": {
                     "200": {
                         "description": "Unit bisnis berhasil diupdate"
-                    },
-                    "403": {
-                        "description": "Akses ditolak"
                     }
                 },
                 "security": [
@@ -2209,28 +2321,6 @@
                 "responses": {
                     "200": {
                         "description": "Unit bisnis berhasil dihapus"
-                    },
-                    "403": {
-                        "description": "Akses ditolak"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/kategori-unit-bisnis": {
-            "get": {
-                "tags": [
-                    "Unit Bisnis"
-                ],
-                "summary": "Get semua kategori unit bisnis",
-                "operationId": "8cbbe2c32fadd10c377cba3c356b938a",
-                "responses": {
-                    "200": {
-                        "description": "List kategori unit bisnis"
                     }
                 },
                 "security": [

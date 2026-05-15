@@ -12,7 +12,6 @@ class LeaderboardController extends Controller
 {
     /**
      * GET /api/leaderboard?bulan=4&tahun=2026
-     * Semua role bisa akses
      * Ranking unit bisnis berdasarkan rata-rata persentase KPI
      */
     public function index(Request $request)
@@ -21,7 +20,8 @@ class LeaderboardController extends Controller
         $bulan   = $request->query('bulan', $periode['bulan']);
         $tahun   = $request->query('tahun', $periode['tahun']);
 
-        $unitBisnisList = UnitBisnis::with('kategori')
+        // Kita load relasi 'users' agar bisa ambil foto profil salah satu usernya
+        $unitBisnisList = UnitBisnis::with(['kategori', 'users'])
             ->where('is_active', true)
             ->get();
 
@@ -33,10 +33,21 @@ class LeaderboardController extends Controller
                 ->where('periode_tahun', $tahun)
                 ->get();
 
+            // Logika untuk mengambil foto profil:
+            // Ambil dari user pertama yang ada di unit bisnis tersebut, 
+            // jika tidak ada user atau foto kosong, gunakan default.jpeg
+            $userProfile = $unitBisnis->users->first();
+            $photoPath = ($userProfile && $userProfile->photo) 
+                         ? $userProfile->photo 
+                         : 'photos/default.jpeg';
+            
+            $photoUrl = asset('storage/' . $photoPath);
+
             if ($kpiPeriods->isEmpty()) {
                 $leaderboard[] = [
                     'unit_bisnis_id'   => $unitBisnis->id,
                     'nama'             => $unitBisnis->nama,
+                    'photo_url'        => $photoUrl, // Tambahkan foto di sini
                     'kategori'         => optional($unitBisnis->kategori)->nama ?? '-',
                     'total_kpi'        => 0,
                     'rata_rata_persen' => 0,
@@ -81,6 +92,7 @@ class LeaderboardController extends Controller
             $leaderboard[] = [
                 'unit_bisnis_id'   => $unitBisnis->id,
                 'nama'             => $unitBisnis->nama,
+                'photo_url'        => $photoUrl, // Tambahkan foto di sini
                 'kategori'         => optional($unitBisnis->kategori)->nama ?? '-',
                 'total_kpi'        => count($kpiPeriods),
                 'rata_rata_persen' => $rataRata,
@@ -90,6 +102,7 @@ class LeaderboardController extends Controller
             ];
         }
 
+        // Urutkan berdasarkan persentase tertinggi
         usort($leaderboard, function ($a, $b) {
             return $b['rata_rata_persen'] <=> $a['rata_rata_persen'];
         });
