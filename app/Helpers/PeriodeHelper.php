@@ -6,12 +6,7 @@ use Carbon\Carbon;
 
 class PeriodeHelper
 {
-    /**
-     * Hitung periode (bulan & tahun) berdasarkan tanggal input
-     * Cut off: tanggal 25
-     * - Tanggal <= 25 → periode bulan ini
-     * - Tanggal > 25 → periode bulan depan
-     */
+    //hitung periode 
     public static function hitungPeriode(?string $tanggal = null): array
     {
         $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
@@ -30,9 +25,7 @@ class PeriodeHelper
         }
     }
 
-    /**
-     * Get tanggal mulai & akhir periode
-     */
+    //get tanggal mulai dan akhir periode 
     public static function getRangePeriode(int $bulan, int $tahun): array
     {
         // Periode mulai dari tanggal 26 bulan sebelumnya

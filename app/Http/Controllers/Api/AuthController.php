@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // Login
+    // login
     public function login(Request $request)
     {
         $request->validate([
@@ -51,7 +51,7 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // Logout
+    // logout 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -61,7 +61,7 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // Get profile user yang sedang login
+    // get profile user yang sedang login
     public function me(Request $request)
     {
         $user = $request->user();

@@ -6,28 +6,61 @@ use App\Http\Controllers\Controller;
 use App\Models\KpiPeriod;
 use App\Models\KpiTemplate;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class KpiPeriodController extends Controller
 {
-    // GET semua KPI period
+    /**
+     * Set periode otomatis berdasarkan cut-off tanggal 25.
+     */
+    private function getCurrentActivePeriode()
+    {
+        $now = Carbon::now(); 
+        $hariIni = $now->day;
+
+        // Jika tanggal 25 ke atas, masuk periode bulan depan
+        if ($hariIni >= 25) {
+            $nextPeriod = $now->copy()->addMonth();
+            return [
+                'bulan' => $nextPeriod->month,
+                'tahun' => $nextPeriod->year
+            ];
+        }
+
+        // Jika sebelum tanggal 25, tetap bulan berjalan
+        return [
+            'bulan' => $now->month,
+            'tahun' => $now->year
+        ];
+    }
+
+    // Ambil data KPI periode aktif
     public function index(Request $request)
     {
         $user = $request->user();
+        $currentPeriode = $this->getCurrentActivePeriode();
 
-        if ($user->role === 'owner') {
-            $periods = KpiPeriod::with(['unitBisnis', 'kpiTemplate'])->get();
-        } else {
-            $periods = KpiPeriod::with(['unitBisnis', 'kpiTemplate'])
-                ->where('unit_bisnis_id', $user->unit_bisnis_id)
-                ->get();
+        $query = KpiPeriod::with(['unitBisnis', 'kpiTemplate'])
+            ->where('periode_bulan', $currentPeriode['bulan'])
+            ->where('periode_tahun', $currentPeriode['tahun']);
+
+        if ($user->role !== 'owner') {
+            $query->where('unit_bisnis_id', $user->unit_bisnis_id);
         }
 
+        $periods = $query->get();
+
         return response()->json([
+            'current_cycle' => [
+                'bulan' => $currentPeriode['bulan'],
+                'tahun' => $currentPeriode['tahun'],
+                'info'  => 'Periode otomatis bergeser setiap tanggal 25'
+            ],
             'data' => $periods
         ], 200);
     }
 
-    // GET KPI period by unit bisnis & periode
+    // Cari histori KPI berdasarkan bulan dan tahun
     public function byPeriode(Request $request, $unitBisnisId)
     {
         $request->validate([
@@ -46,20 +79,19 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // GET summary KPI semua unit bisnis (untuk dashboard owner & ranking)
+    // Ambil rekap KPI semua unit bisnis untuk dashboard & ranking
     public function summary(Request $request)
     {
-        $request->validate([
-            'bulan' => 'required|integer|min:1|max:12',
-            'tahun' => 'required|integer|min:2000',
-        ]);
+        $currentPeriode = $this->getCurrentActivePeriode();
+        $bulan = $request->get('bulan', $currentPeriode['bulan']);
+        $tahun = $request->get('tahun', $currentPeriode['tahun']);
 
         $periods = KpiPeriod::with(['unitBisnis', 'kpiTemplate'])
-            ->where('periode_bulan', $request->bulan)
-            ->where('periode_tahun', $request->tahun)
+            ->where('periode_bulan', $bulan)
+            ->where('periode_tahun', $tahun)
             ->get();
 
-        // Group by unit bisnis
+        // Hitung total target, realisasi, dan persentase
         $summary = $periods->groupBy('unit_bisnis_id')->map(function ($items) {
             $totalTarget    = $items->sum('target');
             $totalRealisasi = $items->sum('realisasi');
@@ -75,15 +107,19 @@ class KpiPeriodController extends Controller
             ];
         })->values();
 
-        // Urutkan berdasarkan persentase (ranking)
+        // Urutkan dari persentase tertinggi
         $ranked = $summary->sortByDesc('persentase')->values();
 
         return response()->json([
+            'meta' => [
+                'periode_bulan' => (int)$bulan,
+                'periode_tahun' => (int)$tahun
+            ],
             'data' => $ranked
         ], 200);
     }
 
-    // POST buat KPI period baru (owner only)
+    // Tambah KPI periode baru
     public function store(Request $request)
     {
         $request->validate([
@@ -96,7 +132,6 @@ class KpiPeriodController extends Controller
             'threshold_kuning'=> 'required|numeric|min:0|max:100',
         ]);
 
-        // Cek duplikat periode
         $existing = KpiPeriod::where('unit_bisnis_id', $request->unit_bisnis_id)
             ->where('kpi_template_id', $request->kpi_template_id)
             ->where('periode_bulan', $request->periode_bulan)
@@ -127,7 +162,7 @@ class KpiPeriodController extends Controller
         ], 201);
     }
 
-    // PUT update realisasi KPI (karyawan & owner)
+    // Update nominal realisasi KPI
     public function updateRealisasi(Request $request, $id)
     {
         $period = KpiPeriod::find($id);
@@ -155,7 +190,7 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // PUT update target & threshold (owner only)
+    // Update target dan batas threshold warna KPI
     public function update(Request $request, $id)
     {
         $period = KpiPeriod::find($id);
@@ -174,7 +209,6 @@ class KpiPeriodController extends Controller
 
         $period->update($request->only(['target', 'threshold_hijau', 'threshold_kuning']));
 
-        // Recalculate status
         $period->status = $this->hitungStatusFromPeriod($period);
         $period->save();
 
@@ -184,7 +218,7 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // DELETE KPI period (owner only)
+    // Hapus KPI periode
     public function destroy($id)
     {
         $period = KpiPeriod::find($id);
@@ -202,7 +236,7 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // Helper: hitung status dari period
+    // Hitung status warna berdasarkan objek period
     private function hitungStatusFromPeriod(KpiPeriod $period): string
     {
         if ($period->target == 0) return 'merah';
@@ -218,7 +252,7 @@ class KpiPeriodController extends Controller
         }
     }
 
-    // Helper: hitung status dari persentase
+    // Hitung status warna berdasarkan persentase angka
     private function hitungStatus(float $persentase, KpiPeriod $period): string
     {
         if ($persentase >= $period->threshold_hijau) {

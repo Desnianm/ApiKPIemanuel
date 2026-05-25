@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
 {
-    // GET semua transaksi
+    //semua transaksi
     public function index(Request $request)
     {
         $user = $request->user();
@@ -31,7 +31,7 @@ class TransaksiController extends Controller
         ], 200);
     }
 
-    // GET detail 1 transaksi
+    //detail 1 transaksi
     public function show($id)
     {
         $transaksi = Transaksi::with(['unitBisnis', 'user'])->find($id);
@@ -47,7 +47,7 @@ class TransaksiController extends Controller
         ], 200);
     }
 
-    // GET transaksi by unit bisnis & periode
+    // transaksi dari unit bisnis dan periode
     public function byPeriode(Request $request, $unitBisnisId)
     {
         $request->validate([
@@ -55,7 +55,7 @@ class TransaksiController extends Controller
             'tahun' => 'required|integer|min:2000',
         ]);
 
-        // Pakai range periode tanggal 26 bulan lalu - 25 bulan ini
+        //  periode tanggal 26 bulan lalu - 25 bulan ini
         $range = PeriodeHelper::getRangePeriode($request->bulan, $request->tahun);
 
         $transaksi = Transaksi::with(['unitBisnis', 'user'])
@@ -76,7 +76,7 @@ class TransaksiController extends Controller
         ], 200);
     }
 
-    // POST buat transaksi baru
+    // post untuk transaksi baru
     public function store(Request $request)
     {
         $request->validate([
@@ -103,10 +103,10 @@ class TransaksiController extends Controller
             $tanggal
         );
 
-        // Hitung periode otomatis berdasarkan tanggal
+        // hitung periode otomatis berdasarkan tanggal
         $periode = PeriodeHelper::hitungPeriode($tanggal);
 
-        // Cek duplikat
+        // cek duplikat
         if (Transaksi::isDuplikat($bookingKey)) {
             return response()->json([
                 'message'     => 'Transaksi ini sudah pernah diinput sebelumnya (duplikat).',
@@ -132,7 +132,7 @@ class TransaksiController extends Controller
             'status_transaksi' => $request->status_transaksi,
         ]);
 
-        // Catat audit log
+        // catat audit log
         AuditHelper::log(
             userId: auth()->id(),
             aksi: 'create',
@@ -149,7 +149,7 @@ class TransaksiController extends Controller
         ], 201);
     }
 
-    // PUT update transaksi (owner only)
+    // put update transaksi (owner only)
     public function update(Request $request, $id)
     {
         $transaksi = Transaksi::find($id);
@@ -169,7 +169,7 @@ class TransaksiController extends Controller
             'status_transaksi' => 'nullable|string|max:50',
         ]);
 
-        // Simpan data lama untuk audit log
+        // simpan data lama untuk audit log
         $dataLama = $transaksi->toArray();
 
         $transaksi->update($request->only([
@@ -177,7 +177,7 @@ class TransaksiController extends Controller
             'data_tambahan', 'bukti_bayar', 'status_transaksi'
         ]));
 
-        // Catat audit log
+        // mencatat audit log
         AuditHelper::log(
             userId: auth()->id(),
             aksi: 'update',
@@ -193,7 +193,7 @@ class TransaksiController extends Controller
         ], 200);
     }
 
-    // DELETE transaksi (owner only)
+    // delete transaksi (owner only)
     public function destroy($id)
     {
         $transaksi = Transaksi::find($id);
@@ -204,7 +204,7 @@ class TransaksiController extends Controller
             ], 404);
         }
 
-        // Catat audit log sebelum hapus
+        // mencatat audit log sebelum hapus
         AuditHelper::log(
             userId: auth()->id(),
             aksi: 'delete',

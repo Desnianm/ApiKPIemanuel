@@ -14,11 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class FormSubmissionController extends Controller
 {
-    /**
-     * GET /api/form-submissions
-     * Owner: lihat semua submission
-     * Karyawan: hanya lihat submission unit bisnis sendiri
-     */
+    //get untuk owner (lihat semua) dan karyawan (hanya lihat divisi mereka sendiri)
     public function index(Request $request)
     {
         $user = $request->user();
@@ -42,10 +38,7 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/form-submissions/{id}
-     * Detail 1 submission beserta semua jawabannya
-     */
+    //get detail 1 submission dan jawabannya 
     public function show($id)
     {
         $submission = FormSubmission::with([
@@ -68,10 +61,7 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/form-submissions/form/{formTemplateId}
-     * Lihat semua submission berdasarkan form template tertentu
-     */
+    //lihat semua submission berdasarkan form template tertentu 
     public function byForm(Request $request, $formTemplateId)
     {
         $user = $request->user();
@@ -92,20 +82,7 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/form-submissions
-     * Karyawan submit form
-     *
-     * Contoh body request:
-     * {
-     *   "form_template_id": 1,
-     *   "answers": [
-     *     { "form_field_id": 1, "nilai": "10" },
-     *     { "form_field_id": 2, "nilai": "5000000" },
-     *     { "form_field_id": 3, "nilai": "Tidak ada catatan" }
-     *   ]
-     * }
-     */
+   //post karyawan submission
     public function store(Request $request)
     {
         $request->validate([
@@ -117,7 +94,7 @@ class FormSubmissionController extends Controller
 
         $user = $request->user();
 
-        // 1. Cek form template ada dan aktif
+        // cek form template ada dan aktif
         $formTemplate = FormTemplate::with('formFields.kpiTemplate')
             ->find($request->form_template_id);
 
@@ -128,7 +105,7 @@ class FormSubmissionController extends Controller
             ], 422);
         }
 
-        // 2. Cek karyawan hanya bisa submit form unit bisnis sendiri
+        // cek karyawan hanya bisa submit form unit bisnis sendiri
         if ($user->role === 'karyawan' || $user->role === 'manajer') {
             if ($formTemplate->unit_bisnis_id != $user->unit_bisnis_id) {
                 return response()->json([
@@ -138,13 +115,13 @@ class FormSubmissionController extends Controller
             }
         }
 
-        // 3. Validasi field wajib harus diisi
+        // validasi field wajib harus diisi
         $answersMap = collect($request->answers)->keyBy('form_field_id');
 
         foreach ($formTemplate->formFields as $field) {
             if ($field->wajib) {
                 $answer = $answersMap->get($field->id);
-                // Field wajib tapi tidak ada di answers, atau nilainya kosong
+                // field wajib tapi tidak ada di answers, atau nilainya kosong
                 if (!$answer || is_null($answer['nilai']) || $answer['nilai'] === '') {
                     return response()->json([
                         'success' => false,
@@ -156,14 +133,14 @@ class FormSubmissionController extends Controller
 
         DB::beginTransaction();
         try {
-            // 4. Buat submission
+            // buat submission
             $submission = FormSubmission::create([
                 'form_template_id' => $formTemplate->id,
                 'unit_bisnis_id'   => $formTemplate->unit_bisnis_id,
                 'user_id'          => $user->id,
             ]);
 
-            // 5. Simpan semua jawaban
+            // menyimpan semua jawaban
             foreach ($request->answers as $answer) {
                 FormSubmissionValue::create([
                     'form_submission_id' => $submission->id,
@@ -172,7 +149,7 @@ class FormSubmissionController extends Controller
                 ]);
             }
 
-            // 6. AUTO UPDATE REALISASI KPI
+            // AUTO UPDATE REALISASI KPI
             // Cari field mana yang punya kpi_template_id (field yang terhubung ke KPI)
             $this->updateRealisasiKpi($formTemplate, $answersMap);
 
@@ -195,10 +172,7 @@ class FormSubmissionController extends Controller
         }
     }
 
-    /**
-     * DELETE /api/form-submissions/{id}
-     * Owner hapus submission
-     */
+    //delete (owner only)
     public function destroy($id)
     {
         $submission = FormSubmission::find($id);
@@ -218,21 +192,14 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    // =============================================
-    // PRIVATE METHOD - Logic Auto Update KPI
-    // =============================================
-
-    /**
-     * Logic inti: otomatis update realisasi KPI
-     * ketika karyawan submit form
-     */
+    //auto update realisasi kpi 
     private function updateRealisasiKpi($formTemplate, $answersMap)
     {
-        // Hitung periode bulan ini pakai PeriodeHelper yang sudah ada
+        // hitung periode bulan ini pakai PeriodeHelper yang sudah ada
         $periode = PeriodeHelper::hitungPeriode();
 
         foreach ($formTemplate->formFields as $field) {
-            // Hanya proses field yang terhubung ke KPI template
+            // hanya  proses field yang terhubung ke KPI template
             if (!$field->kpi_template_id) continue;
 
             // Hanya field bertipe number yang bisa jadi nilai KPI

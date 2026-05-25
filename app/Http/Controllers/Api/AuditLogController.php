@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class AuditLogController extends Controller
 {
-    // GET semua audit log (owner only)
+    // get semua audit log (owner only)
     public function index(Request $request)
     {
         $request->validate([
@@ -33,7 +33,7 @@ class AuditLogController extends Controller
         ], 200);
     }
 
-    // GET audit log by user
+    // get audit log by user
     public function byUser($userId)
     {
         $logs = AuditLog::with('user')
