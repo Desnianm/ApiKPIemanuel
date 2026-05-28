@@ -5,40 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\KpiPeriod;
 use App\Models\KpiTemplate;
+use App\Helpers\PeriodeHelper; // Pastikan helper di-import
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class KpiPeriodController extends Controller
 {
-    /**
-     * Set periode otomatis berdasarkan cut-off tanggal 25.
-     */
-    private function getCurrentActivePeriode()
-    {
-        $now = Carbon::now(); 
-        $hariIni = $now->day;
-
-        // Jika tanggal 25 ke atas, masuk periode bulan depan
-        if ($hariIni >= 25) {
-            $nextPeriod = $now->copy()->addMonth();
-            return [
-                'bulan' => $nextPeriod->month,
-                'tahun' => $nextPeriod->year
-            ];
-        }
-
-        // Jika sebelum tanggal 25, tetap bulan berjalan
-        return [
-            'bulan' => $now->month,
-            'tahun' => $now->year
-        ];
-    }
-
     // Ambil data KPI periode aktif
     public function index(Request $request)
     {
         $user = $request->user();
-        $currentPeriode = $this->getCurrentActivePeriode();
+        // Memanggil fungsi dari Helper terpusat
+        $currentPeriode = PeriodeHelper::hitungPeriode();
 
         $query = KpiPeriod::with(['unitBisnis', 'kpiTemplate'])
             ->where('periode_bulan', $currentPeriode['bulan'])
@@ -54,7 +31,7 @@ class KpiPeriodController extends Controller
             'current_cycle' => [
                 'bulan' => $currentPeriode['bulan'],
                 'tahun' => $currentPeriode['tahun'],
-                'info'  => 'Periode otomatis bergeser setiap tanggal 25'
+                'info'  => 'Periode otomatis bergeser setiap tanggal 26'
             ],
             'data' => $periods
         ], 200);
@@ -82,7 +59,7 @@ class KpiPeriodController extends Controller
     // Ambil rekap KPI semua unit bisnis untuk dashboard & ranking
     public function summary(Request $request)
     {
-        $currentPeriode = $this->getCurrentActivePeriode();
+        $currentPeriode = PeriodeHelper::hitungPeriode();
         $bulan = $request->get('bulan', $currentPeriode['bulan']);
         $tahun = $request->get('tahun', $currentPeriode['tahun']);
 
@@ -91,18 +68,20 @@ class KpiPeriodController extends Controller
             ->where('periode_tahun', $tahun)
             ->get();
 
-        // Hitung total target, realisasi, dan persentase
+        // Hitung total target, realisasi, dan persentase dengan proteksi data kosong
         $summary = $periods->groupBy('unit_bisnis_id')->map(function ($items) {
+            $firstItem = $items->first();
+            
             $totalTarget    = $items->sum('target');
             $totalRealisasi = $items->sum('realisasi');
             $persentase     = $totalTarget > 0 ? round(($totalRealisasi / $totalTarget) * 100, 2) : 0;
 
             return [
-                'unit_bisnis'     => $items->first()->unitBisnis,
+                'unit_bisnis'     => $firstItem ? $firstItem->unitBisnis : null,
                 'total_target'    => $totalTarget,
                 'total_realisasi' => $totalRealisasi,
                 'persentase'      => $persentase,
-                'status'          => $this->hitungStatus($persentase, $items->first()),
+                'status'          => $firstItem ? $this->hitungStatus($persentase, $firstItem) : 'merah',
                 'detail'          => $items,
             ];
         })->values();

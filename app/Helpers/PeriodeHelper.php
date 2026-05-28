@@ -6,26 +6,32 @@ use Carbon\Carbon;
 
 class PeriodeHelper
 {
-    //hitung periode 
+    /**
+     * Menghitung periode aktif berdasarkan aturan cut-off tanggal 26 ke 25.
+     */
     public static function hitungPeriode(?string $tanggal = null): array
     {
         $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
 
-        if ($date->day <= 25) {
-            return [
-                'bulan' => $date->month,
-                'tahun' => $date->year,
-            ];
-        } else {
+        // Siklus berakhir di tanggal 25. Jika sudah tanggal 26 ke atas, masuk periode bulan depan.
+        if ($date->day > 25) {
             $nextMonth = $date->copy()->addMonth();
             return [
                 'bulan' => $nextMonth->month,
                 'tahun' => $nextMonth->year,
             ];
         }
+
+        // Jika tanggal 1 sampai 25, tetap masuk siklus bulan berjalan
+        return [
+            'bulan' => $date->month,
+            'tahun' => $date->year,
+        ];
     }
 
-    //get tanggal mulai dan akhir periode 
+    /**
+     * Mendapatkan rentang tanggal mulai dan akhir dari sebuah periode.
+     */
     public static function getRangePeriode(int $bulan, int $tahun): array
     {
         // Periode mulai dari tanggal 26 bulan sebelumnya
@@ -33,7 +39,7 @@ class PeriodeHelper
             ->subMonth()
             ->setDay(26);
 
-        // Periode berakhir tanggal 25 bulan ini
+        // Periode berakhir tanggal 25 bulan berjalan
         $end = Carbon::create($tahun, $bulan, 25);
 
         return [
