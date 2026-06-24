@@ -23,6 +23,14 @@ class KpiPeriod extends Model
         'threshold_kuning',
     ];
 
+    protected $casts = [
+        // Cast ke float biar tidak dibandingkan sebagai string — mencegah bug kalkulasi
+        'target'           => 'float',
+        'realisasi'        => 'float',
+        'threshold_hijau'  => 'float',
+        'threshold_kuning' => 'float',
+    ];
+
     public function unitBisnis()
     {
         return $this->belongsTo(UnitBisnis::class, 'unit_bisnis_id');
@@ -33,7 +41,20 @@ class KpiPeriod extends Model
         return $this->belongsTo(KpiTemplate::class, 'kpi_template_id');
     }
 
-    // Hitung status otomatis merah/kuning/hijau
+    // Ambil kpi_jenis langsung dari kpiTemplate (untuk baca formula_type)
+    public function kpiJenis()
+    {
+        return $this->hasOneThrough(
+            KpiJenis::class,
+            KpiTemplate::class,
+            'id',           // FK di kpi_templates
+            'id',           // FK di kpi_jenis
+            'kpi_template_id', // kolom lokal di kpi_periods
+            'kpi_jenis_id'  // kolom di kpi_templates
+        );
+    }
+
+    // Hitung status merah/kuning/hijau otomatis
     public function hitungStatus(): string
     {
         if ($this->target == 0) return 'merah';

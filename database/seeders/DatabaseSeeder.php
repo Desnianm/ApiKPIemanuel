@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             KategoriUnitBisnisSeeder::class,
             UnitBisnisSeeder::class,
             UserSeeder::class,
+            KpiJenisSeeder::class,
         ]);
     }
 }

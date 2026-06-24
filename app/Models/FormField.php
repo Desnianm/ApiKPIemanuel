@@ -14,6 +14,7 @@ class FormField extends Model
     protected $fillable = [
         'form_template_id',
         'kpi_template_id',
+        'is_kpi_field',  // flag baru: true = dari katalog, false = tambahan manual
         'label',
         'tipe',
         'options',
@@ -22,8 +23,9 @@ class FormField extends Model
     ];
 
     protected $casts = [
-        'options' => 'array',
-        'wajib'   => 'boolean',
+        'options'      => 'array',
+        'wajib'        => 'boolean',
+        'is_kpi_field' => 'boolean',
     ];
 
     public function formTemplate()
