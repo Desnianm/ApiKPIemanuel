@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\FormTemplateController;
 use App\Http\Controllers\Api\FormSubmissionController;
 use App\Http\Controllers\Api\LeaderboardController;
+use App\Http\Controllers\Api\KpiJenisController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -77,6 +78,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //leaderboard
     Route::get('/leaderboard', [LeaderboardController::class, 'index']);
+
+    // KPI Jenis Catalog - semua role bisa lihat
+    Route::get('/kpi-jenis', [KpiJenisController::class, 'index']);
+    Route::get('/kpi-jenis/{id}', [KpiJenisController::class, 'show']);
 
 });
 
@@ -141,4 +146,9 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
 
     // Owner bisa hapus submission
     Route::delete('/form-submissions/{id}', [FormSubmissionController::class, 'destroy']);
-});
+
+    // KPI Jenis Catalog - owner only
+    Route::post('/kpi-jenis', [KpiJenisController::class, 'store']);
+    Route::put('/kpi-jenis/{id}', [KpiJenisController::class, 'update']);
+    Route::patch('/kpi-jenis/{id}/toggle', [KpiJenisController::class, 'toggle']);
+ });
