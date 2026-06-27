@@ -12,6 +12,278 @@
         }
     ],
     "paths": {
+        "/api/kpi-jenis": {
+            "get": {
+                "tags": [
+                    "KPI Jenis Catalog"
+                ],
+                "summary": "Get daftar katalog KPI (untuk dropdown admin)",
+                "operationId": "2008826f945ead79411faf590ac8ad09",
+                "responses": {
+                    "200": {
+                        "description": "Daftar jenis KPI yang aktif",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/KpiJenisResponse"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "KPI Jenis Catalog"
+                ],
+                "summary": "Tambah jenis KPI baru ke katalog (owner only)",
+                "operationId": "8c484fde26c7ba415e5d134e2a0f088c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode",
+                                    "nama",
+                                    "kategori",
+                                    "satuan_default",
+                                    "formula_type",
+                                    "field_definitions"
+                                ],
+                                "properties": {
+                                    "kode": {
+                                        "type": "string",
+                                        "example": "revenue"
+                                    },
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Revenue"
+                                    },
+                                    "kategori": {
+                                        "type": "string",
+                                        "enum": [
+                                            "sales",
+                                            "operasional",
+                                            "keuangan",
+                                            "sdm",
+                                            "lainnya"
+                                        ],
+                                        "example": "keuangan"
+                                    },
+                                    "satuan_default": {
+                                        "type": "string",
+                                        "enum": [
+                                            "rupiah",
+                                            "persen",
+                                            "unit",
+                                            "malam",
+                                            "lainnya"
+                                        ],
+                                        "example": "rupiah"
+                                    },
+                                    "formula_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "sum",
+                                            "average",
+                                            "count",
+                                            "last_value"
+                                        ],
+                                        "example": "sum"
+                                    },
+                                    "field_definitions": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "label": {
+                                                    "type": "string",
+                                                    "example": "Nilai Transaksi"
+                                                },
+                                                "tipe": {
+                                                    "type": "string",
+                                                    "example": "number"
+                                                },
+                                                "wajib": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "example": "Deskripsi tambahan KPI",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Jenis KPI berhasil ditambahkan"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-jenis/{id}": {
+            "get": {
+                "tags": [
+                    "KPI Jenis Catalog"
+                ],
+                "summary": "Get detail 1 jenis KPI dari katalog",
+                "operationId": "2ac8ade610687aef280b3f8d7c3ca442",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail jenis KPI",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/KpiJenisResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "KPI Jenis Catalog"
+                ],
+                "summary": "Update jenis KPI di katalog (owner only)",
+                "operationId": "46028fd002ae480c1b737577d8f34c10",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Revenue Updated"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Jenis KPI berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-jenis/{id}/toggle": {
+            "patch": {
+                "tags": [
+                    "KPI Jenis Catalog"
+                ],
+                "summary": "Aktifkan/nonaktifkan jenis KPI (owner only)",
+                "operationId": "1b67a533936dd3e4a7eca92234e2dc5e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status jenis KPI berhasil diubah"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
@@ -659,13 +931,351 @@
                 ]
             }
         },
+        "/api/periode/aktif": {
+            "get": {
+                "tags": [
+                    "Statistik & KPI Master"
+                ],
+                "summary": "Get periode yang sedang aktif sesuai logika cut-off tanggal 25",
+                "operationId": "27f210cf76e2bcf143eeb1668ac7e9d0",
+                "responses": {
+                    "200": {
+                        "description": "Info periode aktif",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "bulan": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "tahun": {
+                                                    "type": "integer",
+                                                    "example": 2026
+                                                },
+                                                "label": {
+                                                    "type": "string",
+                                                    "example": "Juli 2026"
+                                                },
+                                                "range": {
+                                                    "properties": {
+                                                        "start": {
+                                                            "type": "string",
+                                                            "example": "2026-06-26"
+                                                        },
+                                                        "end": {
+                                                            "type": "string",
+                                                            "example": "2026-07-25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "cutoff_info": {
+                                                    "type": "string",
+                                                    "example": "Periode bergeser setiap tanggal 26"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-master/summary": {
+            "get": {
+                "tags": [
+                    "Statistik & KPI Master"
+                ],
+                "summary": "Get agregat KPI semua unit bisnis dalam 1 periode (owner only)",
+                "operationId": "e34933f6a43dc1b4ac5063b5a730459a",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan yang ingin dilihat (default: periode aktif)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 6
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun yang ingin dilihat (default: periode aktif)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Agregat KPI seluruh perusahaan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "periode_bulan": {
+                                                    "type": "integer",
+                                                    "example": 6
+                                                },
+                                                "periode_tahun": {
+                                                    "type": "integer",
+                                                    "example": 2026
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "perusahaan": {
+                                                    "properties": {
+                                                        "total_target": {
+                                                            "type": "number",
+                                                            "example": 210000000
+                                                        },
+                                                        "total_realisasi": {
+                                                            "type": "number",
+                                                            "example": 170000000
+                                                        },
+                                                        "persentase": {
+                                                            "type": "number",
+                                                            "example": 80.95
+                                                        },
+                                                        "jumlah_per_status": {
+                                                            "properties": {
+                                                                "hijau": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "kuning": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "merah": {
+                                                                    "type": "integer",
+                                                                    "example": 0
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "breakdown_per_unit": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "total_target": {
+                                                                "type": "number",
+                                                                "example": 100000000
+                                                            },
+                                                            "total_realisasi": {
+                                                                "type": "number",
+                                                                "example": 85000000
+                                                            },
+                                                            "persentase": {
+                                                                "type": "number",
+                                                                "example": 85
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "hijau"
+                                                            },
+                                                            "jumlah_kpi": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-master/trend": {
+            "get": {
+                "tags": [
+                    "Statistik & KPI Master"
+                ],
+                "summary": "Get tren KPI perusahaan multi-bulan untuk grafik (owner only)",
+                "operationId": "f8f23d3f77d511723910f03a229aec21",
+                "parameters": [
+                    {
+                        "name": "dari_bulan",
+                        "in": "query",
+                        "description": "Bulan awal rentang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "dari_tahun",
+                        "in": "query",
+                        "description": "Tahun awal rentang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    },
+                    {
+                        "name": "sampai_bulan",
+                        "in": "query",
+                        "description": "Bulan akhir rentang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 6
+                        }
+                    },
+                    {
+                        "name": "sampai_tahun",
+                        "in": "query",
+                        "description": "Tahun akhir rentang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data tren KPI multi-bulan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "dari": {
+                                                    "type": "string",
+                                                    "example": "Jan 2026"
+                                                },
+                                                "sampai": {
+                                                    "type": "string",
+                                                    "example": "Jun 2026"
+                                                },
+                                                "jumlah_periode": {
+                                                    "type": "integer",
+                                                    "example": 6
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "periode": {
+                                                        "type": "string",
+                                                        "example": "Jun 2026"
+                                                    },
+                                                    "bulan": {
+                                                        "type": "integer",
+                                                        "example": 6
+                                                    },
+                                                    "tahun": {
+                                                        "type": "integer",
+                                                        "example": 2026
+                                                    },
+                                                    "total_target": {
+                                                        "type": "number",
+                                                        "example": 210000000
+                                                    },
+                                                    "total_realisasi": {
+                                                        "type": "number",
+                                                        "example": 170000000
+                                                    },
+                                                    "persentase": {
+                                                        "type": "number",
+                                                        "example": 80.95
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/kpi-periods": {
             "get": {
                 "tags": [
                     "KPI Period"
                 ],
                 "summary": "Get semua KPI period",
-                "operationId": "0f9ea6771f5b1dbda209b583d1e8366e",
+                "operationId": "a6317618ca8254faf69e8e742e45dcee",
                 "responses": {
                     "200": {
                         "description": "List KPI period"
@@ -682,7 +1292,7 @@
                     "KPI Period"
                 ],
                 "summary": "Buat KPI period baru (owner only)",
-                "operationId": "ba5bdf5f85608055be80fa2ee680ad84",
+                "operationId": "e2ea507d620f5583a58c4ad37c0d9bf3",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -753,7 +1363,7 @@
                     "KPI Period"
                 ],
                 "summary": "Get summary & ranking KPI semua unit bisnis",
-                "operationId": "16b24217b41034ea7894bac48ef0d681",
+                "operationId": "59425a8e6954756e7a0b843fa3b05484",
                 "parameters": [
                     {
                         "name": "bulan",
@@ -792,7 +1402,7 @@
                     "KPI Period"
                 ],
                 "summary": "Get KPI period by unit bisnis & periode",
-                "operationId": "d3ac1c1ab7c6ab62b1909ad346962be3",
+                "operationId": "a1a041d13149d9f97084acd76297d4d5",
                 "parameters": [
                     {
                         "name": "unitBisnisId",
@@ -839,7 +1449,7 @@
                     "KPI Period"
                 ],
                 "summary": "Update realisasi KPI",
-                "operationId": "d71576c2ab1382a2544e169bde22575a",
+                "operationId": "89cb38b61fd7069fa9e65cbb85a5648d",
                 "parameters": [
                     {
                         "name": "id",
@@ -887,7 +1497,7 @@
                     "KPI Period"
                 ],
                 "summary": "Update target & threshold KPI (owner only)",
-                "operationId": "289bf2f4087a7f2761da9c6127ee0bce",
+                "operationId": "04e72636176b5e2073f9498026885472",
                 "parameters": [
                     {
                         "name": "id",
@@ -917,7 +1527,7 @@
                     "KPI Period"
                 ],
                 "summary": "Hapus KPI period (owner only)",
-                "operationId": "b6746319ca2af1cbb78002871eaab9bf",
+                "operationId": "61e1575ced97f7bf84683cd286df91f3",
                 "parameters": [
                     {
                         "name": "id",
@@ -949,10 +1559,10 @@
                     "KPI Template"
                 ],
                 "summary": "Get semua KPI template",
-                "operationId": "c2765a11315fbd565b1e870a56fee328",
+                "operationId": "5233b347e36ccce2f59d786daeb780a4",
                 "responses": {
                     "200": {
-                        "description": "List KPI template"
+                        "description": "List KPI template beserta relasi kpi_jenis & form_template"
                     }
                 },
                 "security": [
@@ -965,8 +1575,8 @@
                 "tags": [
                     "KPI Template"
                 ],
-                "summary": "Buat KPI template baru (owner only)",
-                "operationId": "354463128866e85472b1745b8912dd5a",
+                "summary": "Buat KPI template baru dari katalog — otomatis buat form & fields (owner only)",
+                "operationId": "03306bbb2f2cd1a23f59dfe40222dedd",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -974,34 +1584,24 @@
                             "schema": {
                                 "required": [
                                     "unit_bisnis_id",
-                                    "nama",
-                                    "kategori",
-                                    "satuan"
+                                    "kpi_jenis_id"
                                 ],
                                 "properties": {
                                     "unit_bisnis_id": {
+                                        "description": "ID unit bisnis yang akan diberi KPI ini",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "kpi_jenis_id": {
+                                        "description": "ID jenis KPI dari katalog (GET /kpi-jenis untuk daftar)",
                                         "type": "integer",
                                         "example": 1
                                     },
                                     "nama": {
+                                        "description": "Opsional — override nama tampilan",
                                         "type": "string",
-                                        "example": "Revenue Bulanan"
-                                    },
-                                    "kategori": {
-                                        "type": "string",
-                                        "enum": [
-                                            "sales",
-                                            "marketing",
-                                            "operasional"
-                                        ]
-                                    },
-                                    "satuan": {
-                                        "type": "string",
-                                        "example": "rupiah"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "example": "Total cash in per bulan"
+                                        "example": "Revenue Cluster de Matraman",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -1011,7 +1611,10 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "KPI template berhasil dibuat"
+                        "description": "KPI template berhasil dibuat beserta form & fields otomatis"
+                    },
+                    "422": {
+                        "description": "Jenis KPI tidak aktif atau sudah ada di unit bisnis ini"
                     },
                     "403": {
                         "description": "Akses ditolak"
@@ -1029,8 +1632,8 @@
                 "tags": [
                     "KPI Template"
                 ],
-                "summary": "Get detail KPI template",
-                "operationId": "04404600139658defc4fdd9dc00e5946",
+                "summary": "Get detail KPI template beserta form & fields",
+                "operationId": "e62b733b0569c643da6fc1036bf14b1f",
                 "parameters": [
                     {
                         "name": "id",
@@ -1059,8 +1662,8 @@
                 "tags": [
                     "KPI Template"
                 ],
-                "summary": "Update KPI template (owner only)",
-                "operationId": "234232a3add7c0df906eb54419c095e7",
+                "summary": "Update nama & deskripsi KPI template (owner only)",
+                "operationId": "c2dafcd9feec6819490172d3488f77fa",
                 "parameters": [
                     {
                         "name": "id",
@@ -1071,6 +1674,25 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nama": {
+                                        "type": "string",
+                                        "example": "Revenue Bulanan"
+                                    },
+                                    "deskripsi": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "KPI template berhasil diupdate"
@@ -1089,8 +1711,8 @@
                 "tags": [
                     "KPI Template"
                 ],
-                "summary": "Hapus KPI template (owner only)",
-                "operationId": "b14d3d4d1e4d1d6db0464ae66b99636d",
+                "summary": "Hapus KPI template beserta form & periode terkait (owner only)",
+                "operationId": "49c6c87edb8febc577d3945a43120ce8",
                 "parameters": [
                     {
                         "name": "id",
@@ -1103,7 +1725,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "KPI template berhasil dihapus"
+                        "description": "KPI template beserta form dan periode terkait berhasil dihapus"
                     },
                     "403": {
                         "description": "Akses ditolak"
@@ -1121,8 +1743,8 @@
                 "tags": [
                     "KPI Template"
                 ],
-                "summary": "Get KPI template by unit bisnis",
-                "operationId": "06817ad148cfd0368ae1c26940206c33",
+                "summary": "Get KPI template by unit bisnis (include relasi kpi_jenis & form_template)",
+                "operationId": "0c22feba0d8b533ed1a933b00be43d96",
                 "parameters": [
                     {
                         "name": "unitBisnisId",
@@ -1136,6 +1758,9 @@
                 "responses": {
                     "200": {
                         "description": "List KPI template by unit bisnis"
+                    },
+                    "403": {
+                        "description": "Akses ditolak - karyawan unit bisnis lain"
                     }
                 },
                 "security": [
@@ -1810,6 +2435,257 @@
                 "responses": {
                     "200": {
                         "description": "List audit log by user"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/statistik/aktivitas": {
+            "get": {
+                "tags": [
+                    "Statistik & KPI Master"
+                ],
+                "summary": "Get daftar aktivitas submission terbaru (owner only)",
+                "operationId": "f68e385b024aee0e32ef04fae673368c",
+                "parameters": [
+                    {
+                        "name": "tanggal",
+                        "in": "query",
+                        "description": "Filter by tanggal (format: Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2026-06-25"
+                        }
+                    },
+                    {
+                        "name": "unit_bisnis_id",
+                        "in": "query",
+                        "description": "Filter by unit bisnis",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Filter by karyawan tertentu",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 4
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah data per halaman (default: 20)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar aktivitas submission dengan pagination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 78
+                                                            },
+                                                            "form_template_id": {
+                                                                "type": "integer",
+                                                                "example": 38
+                                                            },
+                                                            "unit_bisnis_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "user_id": {
+                                                                "type": "integer",
+                                                                "example": 4
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "example": "2026-06-25T03:04:22.000000Z"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/statistik/aktivitas/trend": {
+            "get": {
+                "tags": [
+                    "Statistik & KPI Master"
+                ],
+                "summary": "Get tren jumlah submission per hari dalam satu periode (owner only)",
+                "operationId": "03500ddf269036c937e6dd978cd8bd04",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan yang ingin dilihat (default: periode aktif)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 6
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun yang ingin dilihat (default: periode aktif)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data tren submission harian",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "bulan": {
+                                                    "type": "integer",
+                                                    "example": 6
+                                                },
+                                                "tahun": {
+                                                    "type": "integer",
+                                                    "example": 2026
+                                                },
+                                                "range_start": {
+                                                    "type": "string",
+                                                    "example": "2026-05-26"
+                                                },
+                                                "range_end": {
+                                                    "type": "string",
+                                                    "example": "2026-06-25"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "trend_harian": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "tanggal": {
+                                                                "type": "string",
+                                                                "example": "2026-06-25"
+                                                            },
+                                                            "jumlah": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "breakdown_per_unit": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "unit_bisnis_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama_unit_bisnis": {
+                                                                "type": "string",
+                                                                "example": "Cluster de Matraman"
+                                                            },
+                                                            "jumlah": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total_submission": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     },
                     "403": {
                         "description": "Akses ditolak"
@@ -2567,6 +3443,77 @@
         }
     },
     "components": {
+        "schemas": {
+            "KpiJenisResponse": {
+                "title": "KpiJenis Response Schema",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "kode": {
+                        "type": "string",
+                        "example": "revenue"
+                    },
+                    "nama": {
+                        "type": "string",
+                        "example": "Revenue"
+                    },
+                    "kategori": {
+                        "type": "string",
+                        "example": "keuangan"
+                    },
+                    "satuan_default": {
+                        "type": "string",
+                        "example": "rupiah"
+                    },
+                    "formula_type": {
+                        "type": "string",
+                        "example": "sum"
+                    },
+                    "field_definitions": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "label": {
+                                    "type": "string",
+                                    "example": "Nilai Transaksi"
+                                },
+                                "tipe": {
+                                    "type": "string",
+                                    "example": "number"
+                                },
+                                "wajib": {
+                                    "type": "boolean",
+                                    "example": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "deskripsi": {
+                        "type": "string",
+                        "example": "Deskripsi katalog KPI",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-06-27T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-06-27T10:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -2577,12 +3524,20 @@
     },
     "tags": [
         {
+            "name": "KPI Jenis Catalog",
+            "description": "KPI Jenis Catalog"
+        },
+        {
             "name": "Auth",
             "description": "Auth"
         },
         {
             "name": "Form Builder",
             "description": "Form Builder"
+        },
+        {
+            "name": "Statistik & KPI Master",
+            "description": "Statistik & KPI Master"
         },
         {
             "name": "KPI Period",

@@ -16,6 +16,9 @@ use App\Http\Controllers\Api\FormTemplateController;
 use App\Http\Controllers\Api\FormSubmissionController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\KpiJenisController;
+use App\Http\Controllers\Api\PeriodeController;
+use App\Http\Controllers\Api\StatistikController;   
+use App\Http\Controllers\Api\KpiMasterController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -83,6 +86,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/kpi-jenis', [KpiJenisController::class, 'index']);
     Route::get('/kpi-jenis/{id}', [KpiJenisController::class, 'show']);
 
+    // Periode aktif - semua role bisa akses
+    Route::get('/periode/aktif', [PeriodeController::class, 'aktif']);
 });
 
 // Protected routes  owner only
@@ -155,4 +160,11 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     // Tambah & hapus field tambahan di form (owner only)
     Route::post('/form-templates/{id}/fields', [FormTemplateController::class, 'addField']);
     Route::delete('/form-templates/{id}/fields/{fieldId}', [FormTemplateController::class, 'deleteField']);
+
+    // Statistik aktivitas - owner only
+    Route::get('/statistik/aktivitas', [StatistikController::class, 'aktivitas']);
+    Route::get('/statistik/aktivitas/trend', [StatistikController::class, 'aktivitasTrend']);
+    // KPI Master - owner only
+    Route::get('/kpi-master/summary', [KpiMasterController::class, 'summary']);
+    Route::get('/kpi-master/trend', [KpiMasterController::class, 'trend']);
  });
