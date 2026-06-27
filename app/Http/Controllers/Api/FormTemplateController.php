@@ -60,8 +60,20 @@ class FormTemplateController extends Controller
      * GET /api/form-templates/unit-bisnis/{unitBisnisId}
      * Lihat semua form template berdasarkan unit bisnis
      */
-    public function byUnitBisnis($unitBisnisId)
+    public function byUnitBisnis(Request $request, $unitBisnisId)
     {
+        $user = $request->user();
+
+        // Karyawan/manajer hanya boleh akses unit bisnis sendiri
+        if ($user->role === 'karyawan' || $user->role === 'manajer') {
+            if ($user->unit_bisnis_id != $unitBisnisId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak bisa mengakses data unit bisnis lain',
+                ], 403);
+            }
+        }
+
         $data = FormTemplate::with(['formFields.kpiTemplate'])
             ->where('unit_bisnis_id', $unitBisnisId)
             ->where('is_active', true)
@@ -294,6 +306,97 @@ class FormTemplateController extends Controller
                 'id'        => $formTemplate->id,
                 'is_active' => $formTemplate->is_active,
             ],
+        ]);
+    }
+        /**
+     * POST /api/form-templates/{id}/fields
+     * Owner tambah field tambahan (non-KPI) ke form yang sudah ada
+     * Field tambahan ini TIDAK bisa dihubungkan ke KPI manapun
+     * Contoh: "Nama Pelanggan", "NIK", "Catatan"
+     */
+    public function addField(Request $request, $id)
+    {
+        $formTemplate = FormTemplate::find($id);
+
+        if (!$formTemplate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Form template tidak ditemukan',
+            ], 404);
+        }
+
+        $request->validate([
+            'label'   => 'required|string|max:150',
+            'tipe'    => 'required|in:text,number,date,select,textarea',
+            'wajib'   => 'boolean',
+            'urutan'  => 'nullable|integer',
+            'options' => 'nullable|array', // untuk tipe select
+        ]);
+
+        // Hitung urutan otomatis kalau tidak diisi
+        // field baru akan diletakkan setelah field yang sudah ada
+        $urutanTerakhir = FormField::where('form_template_id', $formTemplate->id)
+            ->max('urutan') ?? 0;
+
+        $field = FormField::create([
+            'form_template_id' => $formTemplate->id,
+            'kpi_template_id'  => null,  // field tambahan TIDAK terhubung ke KPI
+            'is_kpi_field'     => false, // tandai sebagai field tambahan manual
+            'label'            => $request->label,
+            'tipe'             => $request->tipe,
+            'wajib'            => $request->wajib ?? false,
+            'urutan'           => $request->urutan ?? ($urutanTerakhir + 1),
+            'options'          => $request->options,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Field berhasil ditambahkan ke form',
+            'data'    => $field,
+        ], 201);
+    }
+
+    /**
+     * DELETE /api/form-templates/{id}/fields/{fieldId}
+     * Owner hapus field tambahan dari form
+     * Field yang berasal dari katalog (is_kpi_field = true) TIDAK BISA dihapus
+     * lewat endpoint ini — mencegah admin merusak struktur KPI
+     */
+    public function deleteField($id, $fieldId)
+    {
+        $formTemplate = FormTemplate::find($id);
+
+        if (!$formTemplate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Form template tidak ditemukan',
+            ], 404);
+        }
+
+        $field = FormField::where('id', $fieldId)
+            ->where('form_template_id', $id)
+            ->first();
+
+        if (!$field) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Field tidak ditemukan di form ini',
+            ], 404);
+        }
+
+        // Cek apakah field ini dari katalog — kalau iya, tolak penghapusan
+        if ($field->is_kpi_field) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Field ini tidak bisa dihapus karena merupakan field utama KPI dari katalog',
+            ], 422);
+        }
+
+        $field->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Field berhasil dihapus dari form',
         ]);
     }
 }

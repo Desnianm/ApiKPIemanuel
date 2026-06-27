@@ -93,7 +93,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    // DELETE user (owner only)
+    // DELETE user (owner only) — SOFT DELETE
     public function destroy($id)
     {
         $user = User::find($id);
@@ -104,10 +104,19 @@ class UserController extends Controller
             ], 404);
         }
 
+        // Cegah owner menghapus dirinya sendiri
+        if (auth()->id() === $user->id) {
+            return response()->json([
+                'message' => 'Tidak bisa menghapus akun sendiri.'
+            ], 422);
+        }
+
+        // Soft delete — akun tidak bisa login lagi
+        // tapi riwayat form_submissions tetap utuh
         $user->delete();
 
         return response()->json([
-            'message' => 'User berhasil dihapus.'
+            'message' => 'User berhasil dihapus. Riwayat data tetap tersimpan.'
         ], 200);
     }
 

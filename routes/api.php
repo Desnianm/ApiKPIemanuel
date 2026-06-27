@@ -151,4 +151,8 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     Route::post('/kpi-jenis', [KpiJenisController::class, 'store']);
     Route::put('/kpi-jenis/{id}', [KpiJenisController::class, 'update']);
     Route::patch('/kpi-jenis/{id}/toggle', [KpiJenisController::class, 'toggle']);
+
+    // Tambah & hapus field tambahan di form (owner only)
+    Route::post('/form-templates/{id}/fields', [FormTemplateController::class, 'addField']);
+    Route::delete('/form-templates/{id}/fields/{fieldId}', [FormTemplateController::class, 'deleteField']);
  });
