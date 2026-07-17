@@ -76,7 +76,7 @@ class KpiTemplateAnnotation
      * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      * @OA\RequestBody(
      * @OA\JsonContent(
-     * @OA\Property(property="nama", type="string", example="Revenue Bulanan"),
+     * @OA\Property(property="nama", type="string", example="Revenue Bulanan"), 
      * @OA\Property(property="deskripsi", type="string", nullable=true)
      * )
      * ),

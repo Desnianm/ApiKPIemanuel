@@ -131,6 +131,20 @@ class UserController extends Controller
             ], 404);
         }
 
+        // Cegah nonaktifkan akun sendiri
+        if (auth()->id() === $user->id) {
+            return response()->json([
+                'message' => 'Tidak bisa menonaktifkan akun sendiri.'
+            ], 422);
+        }
+
+        // Cegah nonaktifkan sesama owner
+        if ($user->role === 'owner') {
+            return response()->json([
+                'message' => 'Tidak bisa menonaktifkan akun owner.'
+            ], 422);
+        }
+
         $user->update([
             'is_active' => !$user->is_active
         ]);
