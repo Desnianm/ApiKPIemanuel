@@ -16,9 +16,11 @@ use Illuminate\Http\Request;
  * @OA\Property(property="nama", type="string", example="Revenue"),
  * @OA\Property(property="kategori", type="string", example="keuangan"),
  * @OA\Property(property="satuan_default", type="string", example="rupiah"),
- * @OA\Property(property="formula_type", type="string", example="sum"),
+ * @OA\Property(property="formula_type", type="string",
+ *     enum={"sum","average","count","last_value","minimize","range","binary"},
+ *     example="sum"),
  * @OA\Property(
- * property="field_definitions", 
+ * property="field_definitions",
  * type="array",
  * @OA\Items(
  * type="object",
@@ -27,6 +29,14 @@ use Illuminate\Http\Request;
  * @OA\Property(property="wajib", type="boolean", example=true)
  * )
  * ),
+ * @OA\Property(property="nilai_min", type="number", nullable=true, example=1,
+ *     description="Batas bawah skala — dipakai formula range"),
+ * @OA\Property(property="nilai_max", type="number", nullable=true, example=5,
+ *     description="Batas atas skala — dipakai formula range"),
+ * @OA\Property(property="total_milestone", type="integer", nullable=true, example=4,
+ *     description="Total milestone yang harus dicapai — dipakai formula binary"),
+ * @OA\Property(property="is_capped", type="boolean", example=true,
+ *     description="Apakah persentase dibatasi maksimal 100%"),
  * @OA\Property(property="deskripsi", type="string", example="Deskripsi katalog KPI", nullable=true),
  * @OA\Property(property="is_active", type="boolean", example=true),
  * @OA\Property(property="created_at", type="string", format="date-time", example="2026-06-27T10:00:00Z"),
@@ -110,22 +120,35 @@ class KpiJenisController extends Controller
      * required=true,
      * @OA\JsonContent(
      * required={"kode","nama","kategori","satuan_default","formula_type","field_definitions"},
-     * @OA\Property(property="kode", type="string", example="revenue"),
-     * @OA\Property(property="nama", type="string", example="Revenue"),
-     * @OA\Property(property="kategori", type="string", enum={"sales","operasional","keuangan","sdm","lainnya"}, example="keuangan"),
-     * @OA\Property(property="satuan_default", type="string", enum={"rupiah","persen","unit","malam","lainnya"}, example="rupiah"),
-     * @OA\Property(property="formula_type", type="string", enum={"sum","average","count","last_value"}, example="sum"),
+     * @OA\Property(property="kode", type="string", example="complaint_count"),
+     * @OA\Property(property="nama", type="string", example="Jumlah Komplain"),
+     * @OA\Property(property="kategori", type="string",
+     *     enum={"sales","operasional","keuangan","sdm","lainnya"}, example="operasional"),
+     * @OA\Property(property="satuan_default", type="string",
+     *     enum={"rupiah","persen","unit","malam","lainnya"}, example="unit"),
+     * @OA\Property(property="formula_type", type="string",
+     *     enum={"sum","average","count","last_value","minimize","range","binary"},
+     *     example="minimize"),
      * @OA\Property(
-     * property="field_definitions", 
+     * property="field_definitions",
      * type="array",
      * @OA\Items(
      * type="object",
-     * @OA\Property(property="label", type="string", example="Nilai Transaksi"),
+     * @OA\Property(property="label", type="string", example="Jumlah Komplain"),
      * @OA\Property(property="tipe", type="string", example="number"),
      * @OA\Property(property="wajib", type="boolean", example=true)
      * )
      * ),
-     * @OA\Property(property="deskripsi", type="string", nullable=true, example="Deskripsi tambahan KPI")
+     * @OA\Property(property="nilai_min", type="number", nullable=true, example=null,
+     *     description="Wajib diisi kalau formula_type = range"),
+     * @OA\Property(property="nilai_max", type="number", nullable=true, example=null,
+     *     description="Wajib diisi kalau formula_type = range, harus lebih besar dari nilai_min"),
+     * @OA\Property(property="total_milestone", type="integer", nullable=true, example=null,
+     *     description="Wajib diisi kalau formula_type = binary"),
+     * @OA\Property(property="is_capped", type="boolean", example=true,
+     *     description="Batasi persentase maksimal 100%, default true"),
+     * @OA\Property(property="deskripsi", type="string", nullable=true,
+     *     example="Deskripsi tambahan KPI")
      * )
      * ),
      * @OA\Response(response=201, description="Jenis KPI berhasil ditambahkan"),
@@ -134,18 +157,22 @@ class KpiJenisController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'kode'              => 'required|string|max:50|unique:kpi_jenis,kode',
-            'nama'              => 'required|string|max:150',
-            'kategori'          => 'required|in:sales,operasional,keuangan,sdm,lainnya',
-            'satuan_default'    => 'required|in:rupiah,persen,unit,malam,lainnya',
-            'formula_type'      => 'required|in:sum,average,count,last_value',
-            'field_definitions' => 'required|array|min:1',
-            'field_definitions.*.label' => 'required|string',
-            'field_definitions.*.tipe'  => 'required|in:text,number,date,select,textarea',
-            'field_definitions.*.wajib' => 'boolean',
-            'deskripsi'         => 'nullable|string',
-        ]);
+       $request->validate([
+        'kode'              => 'required|string|max:50|unique:kpi_jenis,kode',
+        'nama'              => 'required|string|max:150',
+        'kategori'          => 'required|in:sales,operasional,keuangan,sdm,lainnya',
+        'satuan_default'    => 'required|in:rupiah,persen,unit,malam,lainnya',
+        'formula_type'      => 'required|in:sum,average,count,last_value,minimize,range,binary',
+        'field_definitions' => 'required|array|min:1',
+        'field_definitions.*.label' => 'required|string',
+        'field_definitions.*.tipe'  => 'required|in:text,number,date,select,textarea',
+        'field_definitions.*.wajib' => 'boolean',
+        'nilai_min'         => 'nullable|numeric',  // wajib kalau formula range
+        'nilai_max'         => 'nullable|numeric|gt:nilai_min', // harus lebih besar dari min
+        'total_milestone'   => 'nullable|integer|min:1', // wajib kalau formula binary
+        'is_capped'         => 'boolean',
+        'deskripsi'         => 'nullable|string',
+    ]);
 
         $kpiJenis = KpiJenis::create($request->all());
 
@@ -185,17 +212,21 @@ class KpiJenisController extends Controller
         }
 
         $request->validate([
-            'kode'              => 'sometimes|string|max:50|unique:kpi_jenis,kode,' . $id,
-            'nama'              => 'sometimes|string|max:150',
-            'kategori'          => 'sometimes|in:sales,operasional,keuangan,sdm,lainnya',
-            'satuan_default'    => 'sometimes|in:rupiah,persen,unit,malam,lainnya',
-            'formula_type'      => 'sometimes|in:sum,average,count,last_value',
-            'field_definitions' => 'sometimes|array|min:1',
-            'field_definitions.*.label' => 'required_with:field_definitions|string',
-            'field_definitions.*.tipe'  => 'required_with:field_definitions|in:text,number,date,select,textarea',
-            'field_definitions.*.wajib' => 'boolean',
-            'deskripsi'         => 'nullable|string',
-        ]);
+        'kode'              => 'sometimes|string|max:50|unique:kpi_jenis,kode,' . $id,
+        'nama'              => 'sometimes|string|max:150',
+        'kategori'          => 'sometimes|in:sales,operasional,keuangan,sdm,lainnya',
+        'satuan_default'    => 'sometimes|in:rupiah,persen,unit,malam,lainnya',
+        'formula_type'      => 'sometimes|in:sum,average,count,last_value,minimize,range,binary',
+        'field_definitions' => 'sometimes|array|min:1',
+        'field_definitions.*.label' => 'required_with:field_definitions|string',
+        'field_definitions.*.tipe'  => 'required_with:field_definitions|in:text,number,date,select,textarea',
+        'field_definitions.*.wajib' => 'boolean',
+        'nilai_min'         => 'nullable|numeric',
+        'nilai_max'         => 'nullable|numeric|gt:nilai_min',
+        'total_milestone'   => 'nullable|integer|min:1',
+        'is_capped'         => 'boolean',
+        'deskripsi'         => 'nullable|string',
+    ]);
 
         $kpiJenis->update($request->all());
 

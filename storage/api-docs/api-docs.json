@@ -74,11 +74,11 @@
                                 "properties": {
                                     "kode": {
                                         "type": "string",
-                                        "example": "revenue"
+                                        "example": "complaint_count"
                                     },
                                     "nama": {
                                         "type": "string",
-                                        "example": "Revenue"
+                                        "example": "Jumlah Komplain"
                                     },
                                     "kategori": {
                                         "type": "string",
@@ -89,7 +89,7 @@
                                             "sdm",
                                             "lainnya"
                                         ],
-                                        "example": "keuangan"
+                                        "example": "operasional"
                                     },
                                     "satuan_default": {
                                         "type": "string",
@@ -100,7 +100,7 @@
                                             "malam",
                                             "lainnya"
                                         ],
-                                        "example": "rupiah"
+                                        "example": "unit"
                                     },
                                     "formula_type": {
                                         "type": "string",
@@ -108,9 +108,12 @@
                                             "sum",
                                             "average",
                                             "count",
-                                            "last_value"
+                                            "last_value",
+                                            "minimize",
+                                            "range",
+                                            "binary"
                                         ],
-                                        "example": "sum"
+                                        "example": "minimize"
                                     },
                                     "field_definitions": {
                                         "type": "array",
@@ -118,7 +121,7 @@
                                             "properties": {
                                                 "label": {
                                                     "type": "string",
-                                                    "example": "Nilai Transaksi"
+                                                    "example": "Jumlah Komplain"
                                                 },
                                                 "tipe": {
                                                     "type": "string",
@@ -131,6 +134,29 @@
                                             },
                                             "type": "object"
                                         }
+                                    },
+                                    "nilai_min": {
+                                        "description": "Wajib diisi kalau formula_type = range",
+                                        "type": "number",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "nilai_max": {
+                                        "description": "Wajib diisi kalau formula_type = range, harus lebih besar dari nilai_min",
+                                        "type": "number",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "total_milestone": {
+                                        "description": "Wajib diisi kalau formula_type = binary",
+                                        "type": "integer",
+                                        "example": null,
+                                        "nullable": true
+                                    },
+                                    "is_capped": {
+                                        "description": "Batasi persentase maksimal 100%, default true",
+                                        "type": "boolean",
+                                        "example": true
                                     },
                                     "deskripsi": {
                                         "type": "string",
@@ -3469,6 +3495,15 @@
                     },
                     "formula_type": {
                         "type": "string",
+                        "enum": [
+                            "sum",
+                            "average",
+                            "count",
+                            "last_value",
+                            "minimize",
+                            "range",
+                            "binary"
+                        ],
                         "example": "sum"
                     },
                     "field_definitions": {
@@ -3490,6 +3525,29 @@
                             },
                             "type": "object"
                         }
+                    },
+                    "nilai_min": {
+                        "description": "Batas bawah skala — dipakai formula range",
+                        "type": "number",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "nilai_max": {
+                        "description": "Batas atas skala — dipakai formula range",
+                        "type": "number",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "total_milestone": {
+                        "description": "Total milestone yang harus dicapai — dipakai formula binary",
+                        "type": "integer",
+                        "example": 4,
+                        "nullable": true
+                    },
+                    "is_capped": {
+                        "description": "Apakah persentase dibatasi maksimal 100%",
+                        "type": "boolean",
+                        "example": true
                     },
                     "deskripsi": {
                         "type": "string",

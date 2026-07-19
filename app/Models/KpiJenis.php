@@ -18,16 +18,23 @@ class KpiJenis extends Model
         'satuan_default',
         'formula_type',
         'field_definitions',
+        'nilai_min', // untuk formula range
+        'nilai_max', // untuk formula range
+        'total_milestone', // untuk formula binary
+        'is_capped', // batasi maksimal 100%
         'deskripsi',
         'is_active',
     ];
 
     protected $casts = [
-        'field_definitions' => 'array', // otomatis parse JSON jadi array PHP
+        'field_definitions' => 'array',
         'is_active'         => 'boolean',
+        'is_capped'         => 'boolean',
+        'nilai_min'         => 'float',
+        'nilai_max'         => 'float',
+        'total_milestone'   => 'integer',
     ];
 
-    // Satu jenis KPI bisa dipakai oleh banyak kpi_template
     public function kpiTemplates()
     {
         return $this->hasMany(KpiTemplate::class, 'kpi_jenis_id');

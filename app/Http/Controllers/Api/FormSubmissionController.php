@@ -196,33 +196,22 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    /**
-     * AUTO UPDATE REALISASI KPI
-     * 
-     * BERUBAH dari v1:
-     * Sebelumnya selalu akumulasi (realisasi += nilai_input) untuk semua KPI
-     * Sekarang bercabang berdasarkan formula_type dari kpi_jenis:
-     * 
-     * sum        → akumulasi (+=) — untuk Revenue, Malam Terjual, Volume Gas
-     * average    → hitung ulang rata-rata dari semua submission periode ini
-     * count      → tambah 1 per submission, nilai input diabaikan
-     * last_value → timpa langsung dengan nilai terbaru — untuk Tingkat Hunian
-     */
+    
     private function updateRealisasiKpi($formTemplate, $answersMap)
     {
         $periode = PeriodeHelper::hitungPeriode();
 
         foreach ($formTemplate->formFields as $field) {
-            // Hanya proses field yang terhubung ke KPI
+            // hanya proses field yang terhubung ke KPI
             if (!$field->kpi_template_id) continue;
 
-            // Hanya field bertipe number yang bisa jadi nilai KPI
+            // hanya field angka yang bisa jadi nilai KPI
             if ($field->tipe !== 'number') continue;
 
-            // Ambil jawaban user untuk field ini
+            // ambil jawaban user untuk field ini
             $answer = $answersMap->get($field->id);
 
-            // Cari KPI period yang sesuai
+            // cari KPI period yang sesuai
             $kpiPeriod = KpiPeriod::where('unit_bisnis_id', $formTemplate->unit_bisnis_id)
                 ->where('kpi_template_id', $field->kpi_template_id)
                 ->where('periode_bulan', $periode['bulan'])
@@ -231,64 +220,146 @@ class FormSubmissionController extends Controller
 
             if (!$kpiPeriod) continue;
 
-            // Ambil formula_type dari kpi_jenis lewat relasi kpiTemplate
-            $formulaType = $field->kpiTemplate?->kpiJenis?->formula_type ?? 'sum';
+            // ambil formula_type dari kpi_jenis
+            $kpiJenis = $field->kpiTemplate?->kpiJenis;
+            $formulaType = $kpiJenis?->formula_type ?? 'sum';
 
-            // Cabang berdasarkan formula_type
             switch ($formulaType) {
+
                 case 'sum':
-                    // Akumulasi — dijumlahkan setiap ada submission baru
-                    // Contoh: Revenue, Malam Terjual, Volume Gas
+                    // dijumlahkan setiap ada submission
+                    // contoh: Revenue, Volume Gas, Malam Terjual
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi += (float) $answer['nilai'];
                     break;
 
                 case 'average':
-                    // Rata-rata dari semua submission periode ini
-                    // Hitung ulang dari semua nilai yang sudah masuk
+                    // rata rata dari semua submission periode ini
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $nilaiInput = (float) $answer['nilai'];
 
-                    // Ambil semua nilai submission untuk field ini di periode yang sama
                     $semuaNilai = FormSubmissionValue::whereHas('formSubmission', function ($q) use ($formTemplate, $periode) {
                             $q->where('unit_bisnis_id', $formTemplate->unit_bisnis_id)
-                              ->whereBetween('created_at', [
-                                  now()->setMonth($periode['bulan'])->setYear($periode['tahun'])->startOfMonth(),
-                                  now()->setMonth($periode['bulan'])->setYear($periode['tahun'])->endOfMonth(),
-                              ]);
+                            ->whereBetween('created_at', [
+                                now()->setMonth($periode['bulan'])->setYear($periode['tahun'])->startOfMonth(),
+                                now()->setMonth($periode['bulan'])->setYear($periode['tahun'])->endOfMonth(),
+                            ]);
                         })
                         ->where('form_field_id', $field->id)
                         ->whereNotNull('nilai')
                         ->pluck('nilai')
                         ->map(fn($n) => (float) $n)
-                        ->push($nilaiInput); // tambahkan nilai yang baru disubmit
+                        ->push($nilaiInput);
 
                     $kpiPeriod->realisasi = round($semuaNilai->avg(), 2);
                     break;
 
                 case 'count':
-                    // Hitung jumlah submission — nilai input diabaikan
-                    // Contoh: Jumlah Pelanggan, Jumlah Layanan
+                    // hitung jumlah submission, nilai input diabaikan
+                    // contoh: Jumlah Pelanggan, Jumlah Layanan
                     $kpiPeriod->realisasi += 1;
                     break;
 
                 case 'last_value':
-                    // Timpa langsung dengan nilai terbaru — tidak diakumulasi
-                    // Contoh: Tingkat Hunian (snapshot harian)
+                    // timpa langsung dengan nilai terbaru
+                    // contoh: Tingkat Hunian (snapshot harian)
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi = (float) $answer['nilai'];
                     break;
 
+                case 'minimize':
+                    // semakin kecil realisasi semakin bagus
+                    // contoh: Biaya Maintenance, Jumlah Komplain
+                    // realisasi disimpan apa adanya, persentase dihitung saat ditampilkan
+                    if (!$answer || is_null($answer['nilai'])) continue 2;
+                    $kpiPeriod->realisasi += (float) $answer['nilai'];
+                    break;
+
+                case 'range':
+                    // berbasis skala min-max
+                    // contoh: rating Kepuasan Tamu (skala 1-5)
+                    // pakai last value karena rating selalu ditimpa nilai terbaru
+                    if (!$answer || is_null($answer['nilai'])) continue 2;
+                    $kpiPeriod->realisasi = (float) $answer['nilai'];
+                    break;
+
+                case 'binary':
+                    // milestone/ya tidak
+                    // contoh: progres Pembangunan
+                    // setiap submit = 1 milestone tercapai
+                    $kpiPeriod->realisasi += 1;
+                    break;
+
                 default:
-                    // Fallback ke sum kalau formula_type tidak dikenali
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi += (float) $answer['nilai'];
                     break;
             }
 
-            // Hitung status merah/kuning/hijau otomatis
-            $kpiPeriod->status = $kpiPeriod->hitungStatus();
+            // hitung status merah/kuning/hijau
+            // untuk minimize: persentase dihitung terbalik
+            if ($formulaType === 'minimize') {
+                $kpiPeriod->status = $this->hitungStatusMinimize($kpiPeriod);
+            } elseif ($formulaType === 'range' && $kpiJenis) {
+                $kpiPeriod->status = $this->hitungStatusRange($kpiPeriod, $kpiJenis);
+            } elseif ($formulaType === 'binary' && $kpiJenis) {
+                $kpiPeriod->status = $this->hitungStatusBinary($kpiPeriod, $kpiJenis);
+            } else {
+                $kpiPeriod->status = $kpiPeriod->hitungStatus();
+            }
+
             $kpiPeriod->save();
         }
+    }
+
+    // helper hitung status untuk formula minimize
+    // semakin kecil realisasi dari target = semakin bagus
+    private function hitungStatusMinimize(KpiPeriod $kpiPeriod): string
+    {
+        if ($kpiPeriod->realisasi == 0) return 'hijau'; // realisasi 0 = sempurna
+        if ($kpiPeriod->target == 0) return 'merah';
+
+        $persentase = ($kpiPeriod->target / $kpiPeriod->realisasi) * 100;
+
+        if ($persentase >= $kpiPeriod->threshold_hijau) return 'hijau';
+        if ($persentase >= $kpiPeriod->threshold_kuning) return 'kuning';
+        return 'merah';
+    }
+
+    // helper hitung status untuk formula range (skala min-max)
+    private function hitungStatusRange(KpiPeriod $kpiPeriod, $kpiJenis): string
+    {
+        $min = $kpiJenis->nilai_min ?? 0;
+        $max = $kpiJenis->nilai_max ?? 100;
+
+        if ($max == $min) return 'merah';
+
+        $realisasiClamped = max($min, min($kpiPeriod->realisasi, $max));
+        $persentase = (($realisasiClamped - $min) / ($max - $min)) * 100;
+
+        if ($persentase >= $kpiPeriod->threshold_hijau) return 'hijau';
+        if ($persentase >= $kpiPeriod->threshold_kuning) return 'kuning';
+        return 'merah';
+    }
+
+    // helper hitung status untuk formula binary (milestone)
+    private function hitungStatusBinary(KpiPeriod $kpiPeriod, $kpiJenis): string
+    {
+        $totalMilestone = $kpiJenis->total_milestone ?? 1;
+
+        if ($totalMilestone == 0) {
+            $persentase = $kpiPeriod->realisasi >= 1 ? 100 : 0;
+        } else {
+            $persentase = ($kpiPeriod->realisasi / $totalMilestone) * 100;
+        }
+
+       
+        if ($kpiJenis->is_capped) {
+            $persentase = min($persentase, 100);
+        }
+
+        if ($persentase >= $kpiPeriod->threshold_hijau) return 'hijau';
+        if ($persentase >= $kpiPeriod->threshold_kuning) return 'kuning';
+        return 'merah';
     }
 }
