@@ -9,15 +9,6 @@ use Illuminate\Http\Request;
 
 class KpiMasterController extends Controller
 {
-    /**
-     * GET /api/kpi-master/summary
-     * Agregat seluruh KPI semua unit bisnis dalam 1 periode
-     * Untuk dashboard utama web admin/owner
-     * 
-     * Query params:
-     * - bulan : bulan yang ingin dilihat (default: periode aktif)
-     * - tahun : tahun yang ingin dilihat (default: periode aktif)
-     */
     public function summary(Request $request)
     {
         $request->validate([
@@ -102,17 +93,7 @@ class KpiMasterController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/kpi-master/trend
-     * Data multi-bulan untuk grafik tren KPI perusahaan
-     * Untuk line chart di web admin/owner
-     * 
-     * Query params:
-     * - dari_bulan  : bulan awal (required)
-     * - dari_tahun  : tahun awal (required)
-     * - sampai_bulan: bulan akhir (required)
-     * - sampai_tahun: tahun akhir (required)
-     */
+
     public function trend(Request $request)
     {
         $request->validate([

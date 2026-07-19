@@ -6,9 +6,7 @@ use Carbon\Carbon;
 
 class PeriodeHelper
 {
-    /**
-     * Menghitung periode aktif berdasarkan aturan cut-off tanggal 26 ke 25.
-     */
+    
     public static function hitungPeriode(?string $tanggal = null): array
     {
         $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
@@ -29,9 +27,7 @@ class PeriodeHelper
         ];
     }
 
-    /**
-     * Mendapatkan rentang tanggal mulai dan akhir dari sebuah periode.
-     */
+   
     public static function getRangePeriode(int $bulan, int $tahun): array
     {
         // Periode mulai dari tanggal 26 bulan sebelumnya

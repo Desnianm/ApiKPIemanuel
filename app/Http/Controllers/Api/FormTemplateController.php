@@ -10,11 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class FormTemplateController extends Controller
 {
-    /**
-     * GET /api/form-templates
-     * Owner: lihat semua form template
-     * Karyawan: hanya lihat form template unit bisnis sendiri
-     */
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -34,10 +30,6 @@ class FormTemplateController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/form-templates/{id}
-     * Detail satu form template beserta semua fields-nya
-     */
     public function show($id)
     {
         $formTemplate = FormTemplate::with(['unitBisnis', 'formFields.kpiTemplate'])
@@ -56,10 +48,6 @@ class FormTemplateController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/form-templates/unit-bisnis/{unitBisnisId}
-     * Lihat semua form template berdasarkan unit bisnis
-     */
     public function byUnitBisnis(Request $request, $unitBisnisId)
     {
         $user = $request->user();
@@ -86,41 +74,6 @@ class FormTemplateController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/form-templates
-     * Owner membuat form template baru beserta fields-nya sekaligus
-     * 
-     * Body contoh:
-     * {
-     *   "unit_bisnis_id": 1,
-     *   "nama": "Form Pendapatan Harian",
-     *   "deskripsi": "Form untuk input pendapatan harian villa",
-     *   "is_active": true,
-     *   "fields": [
-     *     {
-     *       "label": "Jumlah Tamu",
-     *       "tipe": "number",
-     *       "wajib": true,
-     *       "urutan": 1,
-     *       "kpi_template_id": null
-     *     },
-     *     {
-     *       "label": "Total Pendapatan",
-     *       "tipe": "number",
-     *       "wajib": true,
-     *       "urutan": 2,
-     *       "kpi_template_id": 3
-     *     },
-     *     {
-     *       "label": "Catatan",
-     *       "tipe": "textarea",
-     *       "wajib": false,
-     *       "urutan": 3,
-     *       "kpi_template_id": null
-     *     }
-     *   ]
-     * }
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -181,12 +134,7 @@ class FormTemplateController extends Controller
         }
     }
 
-    /**
-     * PUT /api/form-templates/{id}
-     * Owner update form template.
-     * Kalau kirim "fields", maka fields lama dihapus dan diganti yang baru.
-     * Kalau tidak kirim "fields", hanya update info dasar form template saja.
-     */
+
     public function update(Request $request, $id)
     {
         $formTemplate = FormTemplate::find($id);
@@ -257,10 +205,6 @@ class FormTemplateController extends Controller
         }
     }
 
-    /**
-     * DELETE /api/form-templates/{id}
-     * Owner hapus form template (fields otomatis terhapus karena cascade)
-     */
     public function destroy($id)
     {
         $formTemplate = FormTemplate::find($id);
@@ -280,10 +224,7 @@ class FormTemplateController extends Controller
         ]);
     }
 
-    /**
-     * PATCH /api/form-templates/{id}/toggle
-     * Owner aktifkan/nonaktifkan form template
-     */
+
     public function toggle($id)
     {
         $formTemplate = FormTemplate::find($id);
@@ -308,12 +249,7 @@ class FormTemplateController extends Controller
             ],
         ]);
     }
-        /**
-     * POST /api/form-templates/{id}/fields
-     * Owner tambah field tambahan (non-KPI) ke form yang sudah ada
-     * Field tambahan ini TIDAK bisa dihubungkan ke KPI manapun
-     * Contoh: "Nama Pelanggan", "NIK", "Catatan"
-     */
+ 
     public function addField(Request $request, $id)
     {
         $formTemplate = FormTemplate::find($id);
@@ -356,12 +292,7 @@ class FormTemplateController extends Controller
         ], 201);
     }
 
-    /**
-     * DELETE /api/form-templates/{id}/fields/{fieldId}
-     * Owner hapus field tambahan dari form
-     * Field yang berasal dari katalog (is_kpi_field = true) TIDAK BISA dihapus
-     * lewat endpoint ini — mencegah admin merusak struktur KPI
-     */
+
     public function deleteField($id, $fieldId)
     {
         $formTemplate = FormTemplate::find($id);

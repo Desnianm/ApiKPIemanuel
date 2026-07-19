@@ -34,6 +34,9 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Load relasi unit_bisnis
+        $user->load('unitBisnis');
+
         return response()->json([
             'message' => 'Login berhasil.',
             'token'   => $token,
@@ -43,9 +46,13 @@ class AuthController extends Controller
                 'email'          => $user->email,
                 'role'           => $user->role,
                 'unit_bisnis_id' => $user->unit_bisnis_id,
+                'unit_bisnis'    => $user->unit_bisnis_id ? [
+                    'id'   => $user->unitBisnis->id,
+                    'nama' => $user->unitBisnis->nama,
+                ] : null,
                 'photo'          => $user->photo,
-                'photo_url'      => $user->photo 
-                                    ? asset('storage/' . $user->photo) 
+                'photo_url'      => $user->photo
+                                    ? asset('storage/' . $user->photo)
                                     : asset('storage/photos/default.jpeg'),
             ],
         ], 200);
