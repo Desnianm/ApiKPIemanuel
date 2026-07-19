@@ -40,7 +40,6 @@ class KpiTemplateController extends Controller
 
     /**
      * GET /api/kpi-templates/{id}
-     * Detail 1 KPI template beserta relasi kpi_jenis & form_template
      */
     public function show($id)
     {
@@ -65,14 +64,11 @@ class KpiTemplateController extends Controller
 
     /**
      * GET /api/kpi-templates/unit-bisnis/{unitBisnisId}
-     * Sekarang response include relasi kpi_jenis & form_template
-     * supaya frontend tidak perlu fetch form-templates terpisah
      */
     public function byUnitBisnis(Request $request, $unitBisnisId)
     {
         $user = $request->user();
 
-        // Karyawan/manajer hanya boleh akses unit bisnis sendiri
         if ($user->role === 'karyawan' || $user->role === 'manajer') {
             if ($user->unit_bisnis_id != $unitBisnisId) {
                 return response()->json([
@@ -84,11 +80,13 @@ class KpiTemplateController extends Controller
 
         $templates = KpiTemplate::with([
             'unitBisnis',
-            'kpiJenis',                          // info katalog termasuk formula_type
+            'kpiJenis',
             'formTemplate' => function ($query) {
-                $query->withCount('formFields'); // hitung jumlah field tanpa load semua field
+                $query->withCount('formFields')
+                      ->whereNull('deleted_at'); // filter form yang sudah dihapus
             }
         ])
+        ->whereNull('deleted_at') // filter kpi template yang sudah dihapus
         ->where('unit_bisnis_id', $unitBisnisId)
         ->get();
 
@@ -100,26 +98,17 @@ class KpiTemplateController extends Controller
 
     /**
      * POST /api/kpi-templates
-     * 
-     * BERUBAH TOTAL dari v1:
-     * Sebelum: admin input nama, kategori, satuan manual + buat form template terpisah
-     * Sekarang: cukup kirim {unit_bisnis_id, kpi_jenis_id}
-     * Backend otomatis buat kpi_template + form_template + form_fields sekaligus
-     * dalam 1 DB transaction
      */
     public function store(Request $request)
     {
         $request->validate([
             'unit_bisnis_id' => 'required|exists:unit_bisnis,id',
             'kpi_jenis_id'   => 'required|exists:kpi_jenis,id',
-            // nama opsional: kalau tidak diisi, pakai nama dari katalog
             'nama'           => 'nullable|string|max:150',
         ]);
 
-        // Ambil data katalog
         $kpiJenis = KpiJenis::find($request->kpi_jenis_id);
 
-        // Pastikan jenis KPI masih aktif
         if (!$kpiJenis->is_active) {
             return response()->json([
                 'success' => false,
@@ -127,9 +116,9 @@ class KpiTemplateController extends Controller
             ], 422);
         }
 
-        // Cek apakah unit bisnis ini sudah punya KPI dengan jenis yang sama
-        // mencegah duplikat KPI sejenis di unit bisnis yang sama
-        $existing = KpiTemplate::where('unit_bisnis_id', $request->unit_bisnis_id)
+        // Cek duplikat — exclude yang sudah di-soft-delete
+        $existing = KpiTemplate::whereNull('deleted_at')
+            ->where('unit_bisnis_id', $request->unit_bisnis_id)
             ->where('kpi_jenis_id', $request->kpi_jenis_id)
             ->first();
 
@@ -142,8 +131,6 @@ class KpiTemplateController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Buat KPI Template
-            // nama diambil dari katalog kalau admin tidak override
             $template = KpiTemplate::create([
                 'unit_bisnis_id' => $request->unit_bisnis_id,
                 'kpi_jenis_id'   => $kpiJenis->id,
@@ -153,7 +140,6 @@ class KpiTemplateController extends Controller
                 'deskripsi'      => $kpiJenis->deskripsi,
             ]);
 
-            // 2. Buat Form Template otomatis
             $formTemplate = FormTemplate::create([
                 'unit_bisnis_id'  => $request->unit_bisnis_id,
                 'kpi_template_id' => $template->id,
@@ -162,17 +148,15 @@ class KpiTemplateController extends Controller
                 'is_active'       => true,
             ]);
 
-            // 3. Buat Form Fields otomatis dari field_definitions di katalog
-            // field_definitions sudah di-cast ke array di model KpiJenis
-            $fieldDefinitions = is_array($kpiJenis->field_definitions) 
-                ? $kpiJenis->field_definitions 
+            $fieldDefinitions = is_array($kpiJenis->field_definitions)
+                ? $kpiJenis->field_definitions
                 : json_decode($kpiJenis->field_definitions, true);
 
             foreach ($fieldDefinitions as $index => $fieldDef) {
                 FormField::create([
                     'form_template_id' => $formTemplate->id,
-                    'kpi_template_id'  => $template->id, // link ke KPI
-                    'is_kpi_field'     => true,           // tandai sebagai field dari katalog
+                    'kpi_template_id'  => $template->id,
+                    'is_kpi_field'     => true,
                     'label'            => $fieldDef['label'],
                     'tipe'             => $fieldDef['tipe'],
                     'wajib'            => $fieldDef['wajib'] ?? false,
@@ -183,7 +167,6 @@ class KpiTemplateController extends Controller
 
             DB::commit();
 
-            // Load semua relasi untuk response lengkap
             $template->load([
                 'unitBisnis',
                 'kpiJenis',
@@ -207,8 +190,6 @@ class KpiTemplateController extends Controller
 
     /**
      * PUT /api/kpi-templates/{id}
-     * Hanya bisa update nama & deskripsi
-     * kategori & satuan tidak bisa diubah karena sudah terikat katalog
      */
     public function update(Request $request, $id)
     {
@@ -239,11 +220,7 @@ class KpiTemplateController extends Controller
 
     /**
      * DELETE /api/kpi-templates/{id}
-     * 
-     * BERUBAH dari v1:
-     * Sekarang cascade delete dalam 1 DB transaction:
-     * hapus kpi_template → form_template & kpi_periods ikut terhapus otomatis
-     * Frontend tidak perlu hapus satu-satu lagi
+     * Cascade delete form_template & kpi_periods dalam 1 transaksi
      */
     public function destroy($id)
     {
@@ -261,15 +238,11 @@ class KpiTemplateController extends Controller
 
         DB::beginTransaction();
         try {
-            // Hapus form_template terkait (form_fields ikut terhapus via cascade DB)
             if ($template->formTemplate) {
                 $template->formTemplate->delete();
             }
 
-            // Hapus semua kpi_periods terkait
             $template->kpiPeriods()->delete();
-
-            // Hapus kpi_template nya (soft delete karena model pakai SoftDeletes)
             $template->delete();
 
             DB::commit();
