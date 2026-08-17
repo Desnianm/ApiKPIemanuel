@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('kpi_jenis', function (Blueprint $table) {
             $table->id();
-            $table->string('kode', 50)->unique();        // 'revenue', 'occupancy', dst
-            $table->string('nama', 150);                 // "Revenue", "Tingkat Hunian"
+            $table->string('kode', 50)->unique(); // revenue occupancy dst
+            $table->string('nama', 150); // revenue tingkat hunian
             $table->enum('kategori', [
                 'sales', 'operasional', 'keuangan', 'sdm', 'lainnya'
             ]);
@@ -19,13 +19,13 @@ return new class extends Migration
                 'rupiah', 'persen', 'unit', 'malam', 'lainnya'
             ]);
             $table->enum('formula_type', [
-                'sum',        // akumulasi += (untuk Revenue)
-                'average',    // rata-rata dari semua submission
-                'count',      // hitung jumlah submission, abaikan nilai
-                'last_value'  // timpa langsung (untuk Tingkat Hunian)
+                'sum',
+                'average',
+                'count',
+                'last_value'
             ]);
-            // field_definitions: blueprint field yang auto-dibuat saat admin pilih jenis ini
-            // Contoh: [{"label": "Nilai Deal", "tipe": "number", "wajib": true}]
+            // sum akumulasi tambah terus buat revenue, average rata rata dari semua submission, count hitung jumlah submission abaikan nilai, last value timpa langsung buat tingkat hunian
+            // field definitions blueprint field yang otomatis dibuat saat admin pilih jenis ini, contoh label nilai deal tipe number wajib true
             $table->json('field_definitions');
             $table->text('deskripsi')->nullable();
             $table->boolean('is_active')->default(true);

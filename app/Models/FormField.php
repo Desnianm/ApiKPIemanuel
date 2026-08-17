@@ -14,7 +14,7 @@ class FormField extends Model
     protected $fillable = [
         'form_template_id',
         'kpi_template_id',
-        'is_kpi_field',  // flag baru: true = dari katalog, false = tambahan manual
+        'is_kpi_field',
         'label',
         'tipe',
         'options',

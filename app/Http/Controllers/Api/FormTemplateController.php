@@ -52,7 +52,7 @@ class FormTemplateController extends Controller
     {
         $user = $request->user();
 
-        // Karyawan/manajer hanya boleh akses unit bisnis sendiri
+        // karyawan/manajer hanya boleh akses unit bisnis sendiri
         if ($user->role === 'karyawan' || $user->role === 'manajer') {
             if ($user->unit_bisnis_id != $unitBisnisId) {
                 return response()->json([
@@ -93,7 +93,7 @@ class FormTemplateController extends Controller
         // Pakai DB transaction supaya kalau ada error, semua rollback
         DB::beginTransaction();
         try {
-            // 1. Buat form template
+            // membuat form template
             $formTemplate = FormTemplate::create([
                 'unit_bisnis_id' => $request->unit_bisnis_id,
                 'nama'           => $request->nama,
@@ -101,7 +101,7 @@ class FormTemplateController extends Controller
                 'is_active'      => $request->is_active ?? true,
             ]);
 
-            // 2. Buat semua fields-nya sekaligus
+            // buat semua fields-nya sekaligus
             foreach ($request->fields as $field) {
                 FormField::create([
                     'form_template_id' => $formTemplate->id,
@@ -116,7 +116,7 @@ class FormTemplateController extends Controller
 
             DB::commit();
 
-            // Load relasi untuk response
+            // load relasi untuk response
             $formTemplate->load(['unitBisnis', 'formFields.kpiTemplate']);
 
             return response()->json([
@@ -162,17 +162,17 @@ class FormTemplateController extends Controller
 
         DB::beginTransaction();
         try {
-            // Update info dasar
+            // update info dasar
             $formTemplate->update($request->only([
                 'unit_bisnis_id', 'nama', 'deskripsi', 'is_active'
             ]));
 
-            // Kalau request kirim fields → hapus fields lama, buat yang baru
+            // Kalau request kirim fields akan hapus fields lama, buat yang baru
             if ($request->has('fields')) {
                 // Hapus semua fields lama
                 FormField::where('form_template_id', $formTemplate->id)->delete();
 
-                // Buat fields baru
+                // buat fields baru
                 foreach ($request->fields as $field) {
                     FormField::create([
                         'form_template_id' => $formTemplate->id,
@@ -269,15 +269,15 @@ class FormTemplateController extends Controller
             'options' => 'nullable|array', // untuk tipe select
         ]);
 
-        // Hitung urutan otomatis kalau tidak diisi
+        // hitung urutan otomatis kalau tidak diisi
         // field baru akan diletakkan setelah field yang sudah ada
         $urutanTerakhir = FormField::where('form_template_id', $formTemplate->id)
             ->max('urutan') ?? 0;
 
         $field = FormField::create([
             'form_template_id' => $formTemplate->id,
-            'kpi_template_id'  => null,  // field tambahan TIDAK terhubung ke KPI
-            'is_kpi_field'     => false, // tandai sebagai field tambahan manual
+            'kpi_template_id'  => null,
+            'is_kpi_field'     => false,
             'label'            => $request->label,
             'tipe'             => $request->tipe,
             'wajib'            => $request->wajib ?? false,
@@ -315,7 +315,7 @@ class FormTemplateController extends Controller
             ], 404);
         }
 
-        // Cek apakah field ini dari katalog — kalau iya, tolak penghapusan
+        // cek apakah field ini dari katalog — kalau iya, tolak penghapusan
         if ($field->is_kpi_field) {
             return response()->json([
                 'success' => false,

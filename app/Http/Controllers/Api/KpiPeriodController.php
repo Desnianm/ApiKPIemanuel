@@ -169,7 +169,7 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // Update target dan batas threshold warna KPI
+    // update target dan batas threshold warna KPI
     public function update(Request $request, $id)
     {
         $period = KpiPeriod::find($id);
@@ -197,7 +197,7 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // Hapus KPI periode
+    // delete KPI periode
     public function destroy($id)
     {
         $period = KpiPeriod::find($id);
@@ -215,7 +215,7 @@ class KpiPeriodController extends Controller
         ], 200);
     }
 
-    // Hitung status warna berdasarkan objek period
+    // hitung status warna berdasarkan objek period
     private function hitungStatusFromPeriod(KpiPeriod $period): string
     {
         if ($period->target == 0) return 'merah';
@@ -231,7 +231,7 @@ class KpiPeriodController extends Controller
         }
     }
 
-    // Hitung status warna berdasarkan persentase angka
+    // hitung status warna berdasarkan persentase angka
     private function hitungStatus(float $persentase, KpiPeriod $period): string
     {
         if ($persentase >= $period->threshold_hijau) {

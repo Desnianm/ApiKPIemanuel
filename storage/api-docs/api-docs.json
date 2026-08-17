@@ -17,8 +17,20 @@
                 "tags": [
                     "KPI Jenis Catalog"
                 ],
-                "summary": "Get daftar katalog KPI (untuk dropdown admin)",
+                "summary": "Get daftar katalog KPI (untuk dropdown admin), bisa difilter per kategori unit bisnis",
                 "operationId": "2008826f945ead79411faf590ac8ad09",
+                "parameters": [
+                    {
+                        "name": "kategori_id",
+                        "in": "query",
+                        "description": "Filter KPI yang relevan untuk kategori unit bisnis tertentu (Properti/PM/UMKM). Kalau tidak diisi, tampilkan semua KPI aktif.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Daftar jenis KPI yang aktif",
@@ -443,6 +455,189 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bobot-kategori": {
+            "get": {
+                "tags": [
+                    "Bobot Kategori"
+                ],
+                "summary": "Get daftar bobot kategori untuk periode tertentu (owner only)",
+                "operationId": "4c7458158e064169c81fc3741d96b406",
+                "parameters": [
+                    {
+                        "name": "periode",
+                        "in": "query",
+                        "description": "Tahun periode",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar bobot per kategori, termasuk kategori yang belum punya bobot (default 0)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "kategori_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nama_kategori": {
+                                                        "type": "string",
+                                                        "example": "Properti"
+                                                    },
+                                                    "periode": {
+                                                        "type": "integer",
+                                                        "example": 2026
+                                                    },
+                                                    "bobot_persen": {
+                                                        "type": "number",
+                                                        "example": 40
+                                                    },
+                                                    "ditetapkan_oleh": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "tanggal_ditetapkan": {
+                                                        "type": "string",
+                                                        "example": "2026-08-11T07:23:58.000000Z",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal - periode wajib diisi"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Bobot Kategori"
+                ],
+                "summary": "Simpan/update bobot kategori untuk 1 periode sekaligus, total harus 100% (owner only)",
+                "operationId": "395f8e8da186c39aa8dc573323f83ce9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "periode",
+                                    "bobot"
+                                ],
+                                "properties": {
+                                    "periode": {
+                                        "type": "integer",
+                                        "example": 2026
+                                    },
+                                    "bobot": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "kategori_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "bobot_persen": {
+                                                    "type": "number",
+                                                    "example": 40
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bobot kategori berhasil disimpan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bobot kategori berhasil disimpan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal - total bobot semua kategori bukan 100%",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Total bobot semua kategori harus 100%. Total saat ini: 70%"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1274,6 +1469,131 @@
                                                 },
                                                 "type": "object"
                                             }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpi-master/company": {
+            "get": {
+                "tags": [
+                    "KPI Master Company"
+                ],
+                "summary": "Get skor KPI Master tingkat company hasil aggregation 2 level: Kategori -> Unit (owner only)",
+                "operationId": "ff510d0c7e06c363f4a6d947f9f38b4f",
+                "parameters": [
+                    {
+                        "name": "bulan",
+                        "in": "query",
+                        "description": "Bulan yang ingin dilihat (default: periode aktif)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    },
+                    {
+                        "name": "tahun",
+                        "in": "query",
+                        "description": "Tahun yang ingin dilihat (default: periode aktif)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Skor company beserta breakdown kategori dan unit",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "bulan": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "tahun": {
+                                                    "type": "integer",
+                                                    "example": 2026
+                                                },
+                                                "skor_company": {
+                                                    "type": "number",
+                                                    "example": 3.4
+                                                },
+                                                "kategori": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "kategori_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama_kategori": {
+                                                                "type": "string",
+                                                                "example": "Properti"
+                                                            },
+                                                            "rata_rata": {
+                                                                "type": "number",
+                                                                "example": 8.5
+                                                            },
+                                                            "bobot_persen": {
+                                                                "type": "number",
+                                                                "example": 40
+                                                            },
+                                                            "kontribusi": {
+                                                                "type": "number",
+                                                                "example": 3.4
+                                                            },
+                                                            "unit": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "unit_id": {
+                                                                            "type": "integer",
+                                                                            "example": 1
+                                                                        },
+                                                                        "nama_unit": {
+                                                                            "type": "string",
+                                                                            "example": "Cluster de Matraman"
+                                                                        },
+                                                                        "skor": {
+                                                                            "type": "number",
+                                                                            "example": 42.5
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -3590,12 +3910,20 @@
             "description": "Auth"
         },
         {
+            "name": "Bobot Kategori",
+            "description": "Bobot Kategori"
+        },
+        {
             "name": "Form Builder",
             "description": "Form Builder"
         },
         {
             "name": "Statistik & KPI Master",
             "description": "Statistik & KPI Master"
+        },
+        {
+            "name": "KPI Master Company",
+            "description": "KPI Master Company"
         },
         {
             "name": "KPI Period",

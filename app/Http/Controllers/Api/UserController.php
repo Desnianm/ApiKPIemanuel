@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // GET semua user (owner only)
+
     public function index()
     {
         $users = User::with('unitBisnis')->get();
@@ -19,7 +19,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    // GET detail 1 user
+
     public function show($id)
     {
         $user = User::with('unitBisnis')->find($id);
@@ -35,7 +35,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    // POST buat user baru (owner only)
+    // buat user baru cuma owner
     public function store(Request $request)
     {
         $request->validate([
@@ -61,7 +61,7 @@ class UserController extends Controller
         ], 201);
     }
 
-    // PUT update user (owner only)
+
     public function update(Request $request, $id)
     {
         $user = User::find($id);
@@ -93,7 +93,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    // DELETE user (owner only) — SOFT DELETE
+   //soft delete
     public function destroy($id)
     {
         $user = User::find($id);
@@ -104,15 +104,15 @@ class UserController extends Controller
             ], 404);
         }
 
-        // Cegah owner menghapus dirinya sendiri
+        // cegah owner hapus akun sendiri
         if (auth()->id() === $user->id) {
             return response()->json([
                 'message' => 'Tidak bisa menghapus akun sendiri.'
             ], 422);
         }
 
-        // Soft delete — akun tidak bisa login lagi
-        // tapi riwayat form_submissions tetap utuh
+        // Soft delete akun tidak bisa login lagi
+        // tapi riwayat form submissions tetap utuh
         $user->delete();
 
         return response()->json([
@@ -120,7 +120,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    // PATCH toggle aktif/nonaktif user (owner only)
+
     public function toggle($id)
     {
         $user = User::find($id);
@@ -131,14 +131,14 @@ class UserController extends Controller
             ], 404);
         }
 
-        // Cegah nonaktifkan akun sendiri
+        // cegah nonaktifkan akun sendiri
         if (auth()->id() === $user->id) {
             return response()->json([
                 'message' => 'Tidak bisa menonaktifkan akun sendiri.'
             ], 422);
         }
 
-        // Cegah nonaktifkan sesama owner
+        // cegah nonaktifkan sesama owner
         if ($user->role === 'owner') {
             return response()->json([
                 'message' => 'Tidak bisa menonaktifkan akun owner.'

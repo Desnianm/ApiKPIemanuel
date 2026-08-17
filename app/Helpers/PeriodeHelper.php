@@ -11,7 +11,7 @@ class PeriodeHelper
     {
         $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
 
-        // Siklus berakhir di tanggal 25. Jika sudah tanggal 26 ke atas, masuk periode bulan depan.
+        // siklus selesai di tgl 25 dan 26 masuk bulan depan 
         if ($date->day > 25) {
             $nextMonth = $date->copy()->addMonth();
             return [
@@ -20,7 +20,7 @@ class PeriodeHelper
             ];
         }
 
-        // Jika tanggal 1 sampai 25, tetap masuk siklus bulan berjalan
+        // tanggal 1 smpai 25, masuk siklus bulan berjalan
         return [
             'bulan' => $date->month,
             'tahun' => $date->year,
@@ -30,12 +30,12 @@ class PeriodeHelper
    
     public static function getRangePeriode(int $bulan, int $tahun): array
     {
-        // Periode mulai dari tanggal 26 bulan sebelumnya
+        // periode mulai tgl 26 bln sblumnya
         $start = Carbon::create($tahun, $bulan, 1)
             ->subMonth()
             ->setDay(26);
 
-        // Periode berakhir tanggal 25 bulan berjalan
+        // periode berakhir tgl 25 bulan berjalan 
         $end = Carbon::create($tahun, $bulan, 25);
 
         return [

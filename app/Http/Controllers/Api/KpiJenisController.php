@@ -48,9 +48,14 @@ class KpiJenisController extends Controller
     /**
      * @OA\Get(
      * path="/api/kpi-jenis",
-     * summary="Get daftar katalog KPI (untuk dropdown admin)",
+     * summary="Get daftar katalog KPI (untuk dropdown admin), bisa difilter per kategori unit bisnis",
      * tags={"KPI Jenis Catalog"},
      * security={{"bearerAuth":{}}},
+     * @OA\Parameter(
+     *     name="kategori_id", in="query", required=false,
+     *     description="Filter KPI yang relevan untuk kategori unit bisnis tertentu (Properti/PM/UMKM). Kalau tidak diisi, tampilkan semua KPI aktif.",
+     *     @OA\Schema(type="integer", example=1)
+     * ),
      * @OA\Response(
      * response=200,
      * description="Daftar jenis KPI yang aktif",
@@ -62,10 +67,24 @@ class KpiJenisController extends Controller
      * @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = KpiJenis::where('is_active', true)
-            ->orderBy('kategori')
+        $request->validate([
+            'kategori_id' => 'nullable|integer|exists:kategori_unit_bisnis,id',
+        ]);
+
+        $query = KpiJenis::where('is_active', true);
+
+        // Filter opsional berdasarkan kategori unit bisnis.
+        // Kalau parameter tidak dikirim, behavior tetap seperti semula
+        // (balikin semua KPI aktif) — tidak breaking change.
+        if ($request->filled('kategori_id')) {
+            $query->whereHas('kategoriUnitBisnis', function ($q) use ($request) {
+                $q->where('kategori_unit_bisnis.id', $request->kategori_id);
+            });
+        }
+
+        $data = $query->orderBy('kategori')
             ->orderBy('nama')
             ->get();
 
@@ -110,7 +129,7 @@ class KpiJenisController extends Controller
         ]);
     }
 
-    /**
+    /** 
      * @OA\Post(
      * path="/api/kpi-jenis",
      * summary="Tambah jenis KPI baru ke katalog (owner only)",

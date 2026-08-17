@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class FormSubmissionController extends Controller
 {
-    // GET semua submission
+    // get semua submission
     public function index(Request $request)
     {
         $user = $request->user();
@@ -38,7 +38,7 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    // GET detail 1 submission
+    // get detail 1 submission
     public function show($id)
     {
         $submission = FormSubmission::with([
@@ -61,7 +61,7 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    // GET semua submission berdasarkan form template tertentu
+    // get semua submission berdasarkan form template tertentu
     public function byForm(Request $request, $formTemplateId)
     {
         $user = $request->user();
@@ -81,7 +81,7 @@ class FormSubmissionController extends Controller
         ]);
     }
 
-    // POST karyawan submit form
+    // post karyawan submit form
     public function store(Request $request)
     {
         $request->validate([
@@ -93,8 +93,7 @@ class FormSubmissionController extends Controller
 
         $user = $request->user();
 
-        // Load formFields beserta kpiTemplate & kpiJenis sekaligus
-        // kpiJenis dibutuhkan untuk baca formula_type
+        // load formFields beserta kpiTemplate & kpiJenis sekaligus
         $formTemplate = FormTemplate::with([
             'formFields.kpiTemplate.kpiJenis'
         ])->find($request->form_template_id);
@@ -106,7 +105,7 @@ class FormSubmissionController extends Controller
             ], 422);
         }
 
-        // Karyawan hanya bisa submit form unit bisnis sendiri
+        // karyawan cuma bisa submit form unit bisnis sendiri
         if ($user->role === 'karyawan' || $user->role === 'manajer') {
             if ($formTemplate->unit_bisnis_id != $user->unit_bisnis_id) {
                 return response()->json([
@@ -116,7 +115,7 @@ class FormSubmissionController extends Controller
             }
         }
 
-        // Validasi field wajib harus diisi
+        // validasi field wajib harus diisi
         $answersMap = collect($request->answers)->keyBy('form_field_id');
 
         foreach ($formTemplate->formFields as $field) {
@@ -133,14 +132,14 @@ class FormSubmissionController extends Controller
 
         DB::beginTransaction();
         try {
-            // Buat submission
+            // membuat submission
             $submission = FormSubmission::create([
                 'form_template_id' => $formTemplate->id,
                 'unit_bisnis_id'   => $formTemplate->unit_bisnis_id,
                 'user_id'          => $user->id,
             ]);
 
-            // Simpan semua jawaban
+            // simpan semua jawaban
             foreach ($request->answers as $answer) {
                 FormSubmissionValue::create([
                     'form_submission_id' => $submission->id,
@@ -149,7 +148,7 @@ class FormSubmissionController extends Controller
                 ]);
             }
 
-            // AUTO UPDATE REALISASI KPI dengan formula_type
+            // auto up realisasi KPI dengan formula_type
             $this->updateRealisasiKpi($formTemplate, $answersMap);
 
             DB::commit();
@@ -176,7 +175,7 @@ class FormSubmissionController extends Controller
         }
     }
 
-    // DELETE submission (owner only)
+    // delete submission cuma owner
     public function destroy($id)
     {
         $submission = FormSubmission::find($id);
@@ -228,7 +227,6 @@ class FormSubmissionController extends Controller
 
                 case 'sum':
                     // dijumlahkan setiap ada submission
-                    // contoh: Revenue, Volume Gas, Malam Terjual
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi += (float) $answer['nilai'];
                     break;
@@ -256,20 +254,17 @@ class FormSubmissionController extends Controller
 
                 case 'count':
                     // hitung jumlah submission, nilai input diabaikan
-                    // contoh: Jumlah Pelanggan, Jumlah Layanan
                     $kpiPeriod->realisasi += 1;
                     break;
 
                 case 'last_value':
                     // timpa langsung dengan nilai terbaru
-                    // contoh: Tingkat Hunian (snapshot harian)
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi = (float) $answer['nilai'];
                     break;
 
                 case 'minimize':
                     // semakin kecil realisasi semakin bagus
-                    // contoh: Biaya Maintenance, Jumlah Komplain
                     // realisasi disimpan apa adanya, persentase dihitung saat ditampilkan
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi += (float) $answer['nilai'];
@@ -277,16 +272,12 @@ class FormSubmissionController extends Controller
 
                 case 'range':
                     // berbasis skala min-max
-                    // contoh: rating Kepuasan Tamu (skala 1-5)
                     // pakai last value karena rating selalu ditimpa nilai terbaru
                     if (!$answer || is_null($answer['nilai'])) continue 2;
                     $kpiPeriod->realisasi = (float) $answer['nilai'];
                     break;
 
                 case 'binary':
-                    // milestone/ya tidak
-                    // contoh: progres Pembangunan
-                    // setiap submit = 1 milestone tercapai
                     $kpiPeriod->realisasi += 1;
                     break;
 

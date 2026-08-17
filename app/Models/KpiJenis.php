@@ -18,10 +18,10 @@ class KpiJenis extends Model
         'satuan_default',
         'formula_type',
         'field_definitions',
-        'nilai_min', // untuk formula range
-        'nilai_max', // untuk formula range
-        'total_milestone', // untuk formula binary
-        'is_capped', // batasi maksimal 100%
+        'nilai_min', 
+        'nilai_max',
+        'total_milestone', 
+        'is_capped', 
         'deskripsi',
         'is_active',
     ];
@@ -38,5 +38,16 @@ class KpiJenis extends Model
     public function kpiTemplates()
     {
         return $this->hasMany(KpiTemplate::class, 'kpi_jenis_id');
+    }
+
+    // KPI ini bisa relevan untuk beberapa kategori unit bisnis sekaligus
+    public function kategoriUnitBisnis()
+    {
+        return $this->belongsToMany(
+            KategoriUnitBisnis::class,
+            'kpi_jenis_kategori',
+            'kpi_jenis_id',
+            'kategori_id'
+        );
     }
 }

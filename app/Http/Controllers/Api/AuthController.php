@@ -34,7 +34,6 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Load relasi unit_bisnis
         $user->load('unitBisnis');
 
         return response()->json([

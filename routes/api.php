@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\KpiJenisController;
 use App\Http\Controllers\Api\PeriodeController;
 use App\Http\Controllers\Api\StatistikController;   
 use App\Http\Controllers\Api\KpiMasterController;
+use App\Http\Controllers\Api\KpiMasterCompanyController;
+use App\Http\Controllers\Api\BobotKategoriController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -167,4 +169,11 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     // KPI Master - owner only
     Route::get('/kpi-master/summary', [KpiMasterController::class, 'summary']);
     Route::get('/kpi-master/trend', [KpiMasterController::class, 'trend']);
+
+     // KPI Master Company Aggregation - owner only
+    Route::get('/kpi-master/company', [KpiMasterCompanyController::class, 'company']);
+
+    // Bobot Kategori - owner only
+    Route::get('/bobot-kategori', [BobotKategoriController::class, 'index']);
+    Route::post('/bobot-kategori', [BobotKategoriController::class, 'store']);
  });

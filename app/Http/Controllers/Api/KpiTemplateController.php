@@ -12,10 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class KpiTemplateController extends Controller
 {
-    /**
-     * GET /api/kpi-templates
-     * Owner: lihat semua, karyawan/manajer: hanya unit bisnis sendiri
-     */
+    // owner lihat semua, karyawan/manajer: hanya unit bisnis sendiri
     public function index(Request $request)
     {
         $user = $request->user();
@@ -38,9 +35,6 @@ class KpiTemplateController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/kpi-templates/{id}
-     */
     public function show($id)
     {
         $template = KpiTemplate::with([
@@ -62,9 +56,6 @@ class KpiTemplateController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/kpi-templates/unit-bisnis/{unitBisnisId}
-     */
     public function byUnitBisnis(Request $request, $unitBisnisId)
     {
         $user = $request->user();
@@ -83,10 +74,10 @@ class KpiTemplateController extends Controller
             'kpiJenis',
             'formTemplate' => function ($query) {
                 $query->withCount('formFields')
-                      ->whereNull('deleted_at'); // filter form yang sudah dihapus
+                      ->whereNull('deleted_at');
             }
         ])
-        ->whereNull('deleted_at') // filter kpi template yang sudah dihapus
+        ->whereNull('deleted_at') 
         ->where('unit_bisnis_id', $unitBisnisId)
         ->get();
 
@@ -96,9 +87,7 @@ class KpiTemplateController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/kpi-templates
-     */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -116,7 +105,7 @@ class KpiTemplateController extends Controller
             ], 422);
         }
 
-        // Cek duplikat — exclude yang sudah di-soft-delete
+        // cek duplikat exclude yang sudah di soft delete
         $existing = KpiTemplate::whereNull('deleted_at')
             ->where('unit_bisnis_id', $request->unit_bisnis_id)
             ->where('kpi_jenis_id', $request->kpi_jenis_id)
@@ -188,9 +177,6 @@ class KpiTemplateController extends Controller
         }
     }
 
-    /**
-     * PUT /api/kpi-templates/{id}
-     */
     public function update(Request $request, $id)
     {
         $template = KpiTemplate::find($id);
@@ -218,10 +204,6 @@ class KpiTemplateController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/kpi-templates/{id}
-     * Cascade delete form_template & kpi_periods dalam 1 transaksi
-     */
     public function destroy($id)
     {
         $template = KpiTemplate::with([

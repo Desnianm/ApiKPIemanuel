@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class PayrollReminderController extends Controller
 {
-    // GET semua payroll reminder (owner only)
+    // get semua payroll reminder cuma owner
     public function index(Request $request)
     {
         $request->validate([
@@ -36,7 +36,7 @@ class PayrollReminderController extends Controller
         ], 200);
     }
 
-    // GET payroll reminder by user
+    // payroll reminder by user
     public function byUser($userId)
     {
         $payroll = PayrollReminder::with('user')
@@ -50,7 +50,7 @@ class PayrollReminderController extends Controller
         ], 200);
     }
 
-    // POST buat payroll reminder baru (owner only)
+    // buat payroll reminder baru cuma owner
     public function store(Request $request)
     {
         $request->validate([
@@ -63,7 +63,7 @@ class PayrollReminderController extends Controller
             'catatan'       => 'nullable|string',
         ]);
 
-        // Cek duplikat periode per user
+        // cek duplikat periode per user
         $existing = PayrollReminder::where('user_id', $request->user_id)
             ->where('periode_bulan', $request->periode_bulan)
             ->where('periode_tahun', $request->periode_tahun)
@@ -98,7 +98,7 @@ class PayrollReminderController extends Controller
         ], 201);
     }
 
-    // PUT update payroll reminder (owner only)
+    // update payroll reminder cuma owner
     public function update(Request $request, $id)
     {
         $payroll = PayrollReminder::find($id);
@@ -135,7 +135,7 @@ class PayrollReminderController extends Controller
         ], 200);
     }
 
-    // PATCH toggle sudah diingatkan (owner only)
+    //toggle sudah diingatkan cuma owner
     public function toggleReminder($id)
     {
         $payroll = PayrollReminder::find($id);
@@ -159,7 +159,6 @@ class PayrollReminderController extends Controller
         ], 200);
     }
 
-    // DELETE payroll reminder (owner only)
     public function destroy($id)
     {
         $payroll = PayrollReminder::find($id);

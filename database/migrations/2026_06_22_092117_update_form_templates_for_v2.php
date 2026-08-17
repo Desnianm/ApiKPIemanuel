@@ -17,7 +17,6 @@ return new class extends Migration
                   ->after('unit_bisnis_id')
                   ->constrained('kpi_templates')
                   ->onDelete('cascade'); 
-            // cascade: kalau kpi_template dihapus, form_template-nya ikut terhapus otomatis
 
             $table->softDeletes();
         });

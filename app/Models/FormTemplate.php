@@ -14,7 +14,7 @@ class FormTemplate extends Model
 
     protected $fillable = [
         'unit_bisnis_id',
-        'kpi_template_id', // FK baru — null berarti form standalone
+        'kpi_template_id', 
         'nama',
         'deskripsi',
         'is_active',
@@ -29,13 +29,12 @@ class FormTemplate extends Model
         return $this->belongsTo(UnitBisnis::class, 'unit_bisnis_id');
     }
 
-    // Relasi balik ke kpi_template (1-to-1)
+
     public function kpiTemplate()
     {
         return $this->belongsTo(KpiTemplate::class, 'kpi_template_id');
     }
 
-    // Field-field dalam form, diurutkan by urutan
     public function formFields()
     {
         return $this->hasMany(FormField::class, 'form_template_id')->orderBy('urutan');

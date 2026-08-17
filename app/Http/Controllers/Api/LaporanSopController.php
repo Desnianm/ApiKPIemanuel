@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class LaporanSopController extends Controller
 {
-    // GET semua laporan SOP
+    // semua laporan SOP
     public function index(Request $request)
     {
         $user = $request->user();
@@ -29,7 +29,7 @@ class LaporanSopController extends Controller
         ], 200);
     }
 
-    // GET detail 1 laporan SOP
+    //  detail 1 laporan SOP
     public function show($id)
     {
         $laporan = LaporanSop::with(['unitBisnis', 'user', 'reviewedBy'])->find($id);
@@ -45,7 +45,7 @@ class LaporanSopController extends Controller
         ], 200);
     }
 
-    // POST buat laporan SOP baru (karyawan)
+    //  buat laporan SOP baru (karyawan)
     public function store(Request $request)
     {
         $request->validate([
@@ -76,7 +76,7 @@ class LaporanSopController extends Controller
         ], 201);
     }
 
-    // PATCH review laporan SOP (owner only)
+    // review laporan SOP cuma owner
     public function review(Request $request, $id)
     {
         $laporan = LaporanSop::find($id);
@@ -107,7 +107,7 @@ class LaporanSopController extends Controller
         ], 200);
     }
 
-    // DELETE laporan SOP (owner only)
+    // laporan SOP cuma owner
     public function destroy($id)
     {
         $laporan = LaporanSop::find($id);

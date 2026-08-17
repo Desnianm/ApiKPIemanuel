@@ -103,7 +103,7 @@ class KpiMasterController extends Controller
             'sampai_tahun' => 'required|integer|min:2000',
         ]);
 
-        // Buat list semua periode dalam rentang yang diminta
+        // buat list semua periode dalam rentang yang diminta
         $periodeList = $this->generatePeriodeList(
             $request->dari_bulan,
             $request->dari_tahun,
@@ -111,7 +111,7 @@ class KpiMasterController extends Controller
             $request->sampai_tahun
         );
 
-        // Ambil semua KPI period dalam rentang tersebut
+        // ambil semua KPI period dalam rentang tersebut
         $allPeriods = KpiPeriod::with(['unitBisnis', 'kpiTemplate'])
             ->where(function ($query) use ($periodeList) {
                 foreach ($periodeList as $periode) {
@@ -129,7 +129,7 @@ class KpiMasterController extends Controller
             9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des',
         ];
 
-        // Susun data tren per periode
+        // susun data tren per periode
         $trendData = collect($periodeList)->map(function ($periode) use ($allPeriods, $namaBulan) {
             $periodePeriods = $allPeriods
                 ->where('periode_bulan', $periode['bulan'])
@@ -141,7 +141,7 @@ class KpiMasterController extends Controller
                 ? round(($totalRealisasi / $totalTarget) * 100, 2)
                 : 0;
 
-            // Hitung jumlah unit bisnis per status di periode ini
+            // hitung jumlah unit bisnis per status di periode ini
             $unitBisnisIds = $periodePeriods->pluck('unit_bisnis_id')->unique();
             $statusPerUnit = $unitBisnisIds->map(function ($unitId) use ($periodePeriods) {
                 $unitPeriods    = $periodePeriods->where('unit_bisnis_id', $unitId);
@@ -190,7 +190,7 @@ class KpiMasterController extends Controller
         $bulan   = $dariBulan;
         $tahun   = $dariTahun;
 
-        // Maksimal 24 bulan ke belakang biar tidak overload
+        // maksimal 24 bulan ke belakang biar tidak overload
         $maxIterasi = 24;
         $iterasi    = 0;
 
@@ -212,7 +212,7 @@ class KpiMasterController extends Controller
     }
 
     //Helper: Tentukan status unit bisnis berdasarkan persentase 
-    // Pakai threshold dari KPI period pertama sebagai acuan
+    // memakai threshold dari KPI period pertama sebagai acuan
     private function tentukanStatus(float $persentase, ?KpiPeriod $period): string
     {
         if (!$period) return 'merah';

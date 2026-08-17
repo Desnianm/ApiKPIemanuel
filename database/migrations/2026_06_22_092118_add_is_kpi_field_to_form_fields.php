@@ -9,7 +9,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('form_fields', function (Blueprint $table) {
-            // Flag pembeda:
             // true  = field dari katalog (auto-generated, TIDAK bisa dihapus admin)
             // false = field tambahan manual admin (BISA dihapus admin)
             $table->boolean('is_kpi_field')

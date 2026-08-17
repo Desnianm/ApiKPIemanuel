@@ -24,7 +24,7 @@ class KpiPeriod extends Model
     ];
 
     protected $casts = [
-        // Cast ke float biar tidak dibandingkan sebagai string — mencegah bug kalkulasi
+        //mencegah bug kalkulasi
         'target'           => 'float',
         'realisasi'        => 'float',
         'threshold_hijau'  => 'float',
@@ -41,20 +41,20 @@ class KpiPeriod extends Model
         return $this->belongsTo(KpiTemplate::class, 'kpi_template_id');
     }
 
-    // Ambil kpi_jenis langsung dari kpiTemplate (untuk baca formula_type)
+    // ambil kpijenis langsung dari kpiTemplate untuk baca formula type
     public function kpiJenis()
     {
         return $this->hasOneThrough(
             KpiJenis::class,
             KpiTemplate::class,
-            'id',           // FK di kpi_templates
-            'id',           // FK di kpi_jenis
-            'kpi_template_id', // kolom lokal di kpi_periods
-            'kpi_jenis_id'  // kolom di kpi_templates
+            'id',  
+            'id',  
+            'kpi_template_id',
+            'kpi_jenis_id' 
         );
     }
 
-    // Hitung status merah/kuning/hijau otomatis
+    // hitung status merah/kuning/hijau otomatis
     public function hitungStatus(): string
     {
         if ($this->target == 0) return 'merah';

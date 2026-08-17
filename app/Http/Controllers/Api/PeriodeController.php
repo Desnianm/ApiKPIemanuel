@@ -7,16 +7,12 @@ use App\Helpers\PeriodeHelper;
 
 class PeriodeController extends Controller
 {
-    /**
-     * GET /api/periode/aktif
-     * Return periode yang sedang aktif sesuai logika cut-off tanggal 25
-     * Supaya frontend (mobile & web) tidak perlu duplikasi logika ini sendiri
-     */
+    
     public function aktif()
     {
         $periode = PeriodeHelper::hitungPeriode();
 
-        // Buat label bulan dalam bahasa Indonesia
+        // buat label bulan dalam bahasa Indonesia
         $namaBulan = [
             1  => 'Januari',  2  => 'Februari', 3  => 'Maret',
             4  => 'April',    5  => 'Mei',       6  => 'Juni',

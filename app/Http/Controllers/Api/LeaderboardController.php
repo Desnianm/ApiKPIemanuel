@@ -10,17 +10,14 @@ use Illuminate\Http\Request;
 
 class LeaderboardController extends Controller
 {
-    /**
-     * GET /api/leaderboard?bulan=4&tahun=2026
-     * Ranking unit bisnis berdasarkan rata-rata persentase KPI
-     */
+    //ranking unit bisnis
     public function index(Request $request)
     {
         $periode = PeriodeHelper::hitungPeriode();
         $bulan   = $request->query('bulan', $periode['bulan']);
         $tahun   = $request->query('tahun', $periode['tahun']);
 
-        // Kita load relasi 'users' agar bisa ambil foto profil salah satu usernya
+        // load relasi users agar bisa ambil foto profil salah satu usernya
         $unitBisnisList = UnitBisnis::with(['kategori', 'users'])
             ->where('is_active', true)
             ->get();
@@ -33,9 +30,7 @@ class LeaderboardController extends Controller
                 ->where('periode_tahun', $tahun)
                 ->get();
 
-            // Logika untuk mengambil foto profil:
-            // Ambil dari user pertama yang ada di unit bisnis tersebut, 
-            // jika tidak ada user atau foto kosong, gunakan default.jpeg
+
             $userProfile = $unitBisnis->users->first();
             $photoPath = ($userProfile && $userProfile->photo) 
                          ? $userProfile->photo 
@@ -92,7 +87,7 @@ class LeaderboardController extends Controller
             $leaderboard[] = [
                 'unit_bisnis_id'   => $unitBisnis->id,
                 'nama'             => $unitBisnis->nama,
-                'photo_url'        => $photoUrl, // Tambahkan foto di sini
+                'photo_url'        => $photoUrl, 
                 'kategori'         => optional($unitBisnis->kategori)->nama ?? '-',
                 'total_kpi'        => count($kpiPeriods),
                 'rata_rata_persen' => $rataRata,
@@ -102,7 +97,7 @@ class LeaderboardController extends Controller
             ];
         }
 
-        // Urutkan berdasarkan persentase tertinggi
+        // urutkan berdasarkan persentase tertinggi
         usort($leaderboard, function ($a, $b) {
             return $b['rata_rata_persen'] <=> $a['rata_rata_persen'];
         });
@@ -121,9 +116,7 @@ class LeaderboardController extends Controller
         ]);
     }
 
-    /**
-     * Konversi status merah/kuning/hijau ke indikator
-     */
+    //konversi merah, kuning, hijau
     private function getIndikator(string $status): string
     {
         return match($status) {

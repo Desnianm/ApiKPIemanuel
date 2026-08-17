@@ -9,17 +9,7 @@ use Illuminate\Http\Request;
 
 class StatistikController extends Controller
 {
-    /**
-     * GET /api/statistik/aktivitas
-     * Daftar aktivitas submission terbaru lintas unit bisnis
-     * Untuk tabel aktivitas di web admin/owner
-     * 
-     * Query params (semua opsional):
-     * - tanggal     : filter by tanggal tertentu (format: Y-m-d)
-     * - unit_bisnis_id : filter by unit bisnis
-     * - user_id     : filter by karyawan tertentu
-     * - per_page    : jumlah data per halaman (default: 20)
-     */
+
     public function aktivitas(Request $request)
     {
         $request->validate([
@@ -36,17 +26,17 @@ class StatistikController extends Controller
             'values.formField',
         ]);
 
-        // Filter by tanggal
+        // filter by tanggal
         if ($request->tanggal) {
             $query->whereDate('created_at', $request->tanggal);
         }
 
-        // Filter by unit bisnis
+        // filter by unit bisnis
         if ($request->unit_bisnis_id) {
             $query->where('unit_bisnis_id', $request->unit_bisnis_id);
         }
 
-        // Filter by user/karyawan
+        // filter by user/karyawan
         if ($request->user_id) {
             $query->where('user_id', $request->user_id);
         }
@@ -60,15 +50,7 @@ class StatistikController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/statistik/aktivitas/trend
-     * Data jumlah submission per hari dalam satu bulan
-     * Untuk grafik tren aktivitas di web admin/owner
-     * 
-     * Query params:
-     * - bulan : bulan yang ingin dilihat (default: periode aktif)
-     * - tahun : tahun yang ingin dilihat (default: periode aktif)
-     */
+
     public function aktivitasTrend(Request $request)
     {
         $request->validate([
@@ -76,22 +58,22 @@ class StatistikController extends Controller
             'tahun' => 'nullable|integer|min:2000',
         ]);
 
-        // Default ke periode aktif kalau tidak diisi
+        // default ke periode aktif kalau tidak diisi
         $currentPeriode = PeriodeHelper::hitungPeriode();
         $bulan          = $request->bulan ?? $currentPeriode['bulan'];
         $tahun          = $request->tahun ?? $currentPeriode['tahun'];
 
-        // Ambil range tanggal periode ini (cut-off tgl 25)
+        // ambil range tanggal periode ini (cut-off tgl 25)
         $range = PeriodeHelper::getRangePeriode($bulan, $tahun);
 
-        // Hitung jumlah submission per hari dalam range periode
+        // hitung jumlah submission per hari dalam range periode
         $trend = FormSubmission::selectRaw('DATE(created_at) as tanggal, COUNT(*) as jumlah')
             ->whereBetween('created_at', [$range['start'] . ' 00:00:00', $range['end'] . ' 23:59:59'])
             ->groupBy('tanggal')
             ->orderBy('tanggal')
             ->get();
 
-        // Breakdown per unit bisnis juga
+        // breakdown per unit bisnis juga
         $breakdownPerUnit = FormSubmission::selectRaw('unit_bisnis_id, COUNT(*) as jumlah')
             ->whereBetween('created_at', [$range['start'] . ' 00:00:00', $range['end'] . ' 23:59:59'])
             ->with('unitBisnis')

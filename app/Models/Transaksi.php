@@ -43,14 +43,14 @@ class Transaksi extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Generate booking key otomatis
+    // generate booking key otomatis
     public static function generateBookingKey(string $nama, string $noHp, string $tanggal): string
     {
         $noHp4digit = substr($noHp, -4);
         return strtoupper(md5($nama . $noHp4digit . $tanggal));
     }
 
-    // Cek duplikat booking key
+    // cek duplikat booking key
     public static function isDuplikat(string $bookingKey): bool
     {
         return self::where('booking_key', $bookingKey)->exists();

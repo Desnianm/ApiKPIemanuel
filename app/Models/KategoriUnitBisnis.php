@@ -26,4 +26,21 @@ class KategoriUnitBisnis extends Model
     {
         return $this->hasMany(UnitBisnis::class, 'kategori_id');
     }
+
+    public function bobotKategoriPeriode()
+    {
+        return $this->hasMany(BobotKategoriPeriode::class, 'kategori_id');
+    }
+
+
+    public function kpiJenis()
+    {
+        return $this->belongsToMany(
+            KpiJenis::class,
+            'kpi_jenis_kategori',
+            'kategori_id',
+            'kpi_jenis_id'
+        );
+    }
 }
+

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class LaporanHarianController extends Controller
 {
-    // GET semua laporan harian
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -29,7 +29,6 @@ class LaporanHarianController extends Controller
         ], 200);
     }
 
-    // GET detail 1 laporan
     public function show($id)
     {
         $laporan = LaporanHarian::with(['unitBisnis', 'user'])->find($id);
@@ -45,7 +44,6 @@ class LaporanHarianController extends Controller
         ], 200);
     }
 
-    // GET laporan by unit bisnis & periode
     public function byPeriode(Request $request, $unitBisnisId)
     {
         $request->validate([
@@ -68,7 +66,7 @@ class LaporanHarianController extends Controller
         ], 200);
     }
 
-    // POST buat laporan harian baru
+
     public function store(Request $request)
     {
         $request->validate([
@@ -80,7 +78,7 @@ class LaporanHarianController extends Controller
             'catatan'        => 'nullable|string',
         ]);
 
-        // Cek apakah sudah ada laporan di tanggal yang sama
+        // cek apakah sudah ada laporan di tanggal yang sama
         $existing = LaporanHarian::where('unit_bisnis_id', $request->unit_bisnis_id)
             ->where('user_id', $request->user()->id)
             ->where('tanggal', $request->tanggal)
@@ -109,7 +107,7 @@ class LaporanHarianController extends Controller
         ], 201);
     }
 
-    // PUT update laporan harian
+
     public function update(Request $request, $id)
     {
         $laporan = LaporanHarian::find($id);
@@ -137,7 +135,7 @@ class LaporanHarianController extends Controller
         ], 200);
     }
 
-    // DELETE laporan (owner only)
+
     public function destroy($id)
     {
         $laporan = LaporanHarian::find($id);

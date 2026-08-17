@@ -14,32 +14,37 @@ class KpiTemplate extends Model
 
     protected $fillable = [
         'unit_bisnis_id',
-        'kpi_jenis_id',  // FK baru ke katalog
+        'kpi_jenis_id', 
         'nama',
         'kategori',
         'satuan',
         'deskripsi',
+        'cap_max_persen',
     ];
 
-    // Relasi ke unit bisnis
+    protected $casts = [
+        'cap_max_persen' => 'float',
+    ];
+
+    // relasi ke unit bisnis
     public function unitBisnis()
     {
         return $this->belongsTo(UnitBisnis::class, 'unit_bisnis_id');
     }
 
-    // Relasi ke katalog KPI
+    // relasi ke katalog KPI
     public function kpiJenis()
     {
         return $this->belongsTo(KpiJenis::class, 'kpi_jenis_id');
     }
 
-    // Relasi 1-to-1 ke form template yang auto-generated
+    // relasi 1 to 1 ke form template yang auto generated
     public function formTemplate()
     {
         return $this->hasOne(FormTemplate::class, 'kpi_template_id');
     }
 
-    // Relasi ke semua periode KPI
+    // relasi ke semua periode KPI
     public function kpiPeriods()
     {
         return $this->hasMany(KpiPeriod::class, 'kpi_template_id');
